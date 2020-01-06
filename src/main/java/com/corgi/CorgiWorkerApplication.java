@@ -1,6 +1,7 @@
 package com.corgi;
 
 import com.corgi.common.CorgiQueueName;
+import io.netty.buffer.ByteBuf;
 import org.springframework.amqp.core.Queue;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
