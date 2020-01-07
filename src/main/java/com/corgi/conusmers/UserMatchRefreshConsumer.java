@@ -63,8 +63,10 @@ public class UserMatchRefreshConsumer {
                         redisTemplate.opsForValue().set(matchKey, match.toString(), expire);
                     }
                 }
+            } else {
+                break;
             }
-        } while (CollectionUtils.isEmpty(userMatchList));
+        } while (true);
     }
 
     private UserDetail getUserDetail(String loginUserId, String userId, UserDetail loginUserDetail) {
