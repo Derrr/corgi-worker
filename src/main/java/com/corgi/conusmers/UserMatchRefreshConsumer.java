@@ -1,5 +1,6 @@
 package com.corgi.conusmers;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.CorgiConstants;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.common.messages.MatchRefresher;
@@ -8,7 +9,6 @@ import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserMatch;
 import com.rabbitmq.client.Channel;
-import jdk.nashorn.internal.ir.annotations.Reference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
