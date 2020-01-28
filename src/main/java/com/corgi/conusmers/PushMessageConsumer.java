@@ -21,6 +21,7 @@ public class PushMessageConsumer {
 
     @RabbitHandler
     public void process(PushMessage pushMessage) {
+        log.info("recevied message: " + pushMessage.getMessage());
         pushService.sendMessage(pushMessage);
     }
 }
