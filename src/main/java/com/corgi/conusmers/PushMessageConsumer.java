@@ -1,12 +1,9 @@
 package com.corgi.conusmers;
 
 import com.corgi.common.CorgiQueueName;
-import com.corgi.common.messages.MatchRefresher;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.service.PushService;
-import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
