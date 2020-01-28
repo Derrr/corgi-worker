@@ -33,6 +33,11 @@ public class CorgiWorkerApplication {
     }
 
     @Bean
+    public Queue pushMessageQueue() {
+        return new Queue(CorgiQueueName.PUSH_MESSAGE_QUEUE);
+    }
+
+    @Bean
     public JPushClient getJPushClient(){
         JPushClient jpushClient = new JPushClient(MASTER_SECRET, APP_KEY, null, ClientConfig.getInstance());
         return jpushClient;
