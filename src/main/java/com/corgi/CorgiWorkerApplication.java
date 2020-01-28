@@ -1,16 +1,27 @@
 package com.corgi;
 
+import cn.jiguang.common.ClientConfig;
+import cn.jpush.api.JPushClient;
 import com.alibaba.dubbo.spring.boot.annotation.EnableDubboConfiguration;
 import com.corgi.common.CorgiQueueName;
 import io.netty.buffer.ByteBuf;
 import org.springframework.amqp.core.Queue;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+/**
+ * @author tairanliu
+ */
 @SpringBootApplication
 @EnableDubboConfiguration
 public class CorgiWorkerApplication {
+    @Value("${push.masterSecret}")
+    private String MASTER_SECRET;
+
+    @Value("${push.appKey}")
+    private String APP_KEY;
 
     public static void main(String[] args) {
         SpringApplication.run(CorgiWorkerApplication.class, args);
@@ -19,5 +30,11 @@ public class CorgiWorkerApplication {
     @Bean
     public Queue refreshMatchQueue() {
         return new Queue(CorgiQueueName.REFRESH_MATCH_QUEUE);
+    }
+
+    @Bean
+    public JPushClient getJPushClient(){
+        JPushClient jpushClient = new JPushClient(MASTER_SECRET, APP_KEY, null, ClientConfig.getInstance());
+        return jpushClient;
     }
 }
