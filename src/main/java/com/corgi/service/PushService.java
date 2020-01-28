@@ -48,10 +48,14 @@ public class PushService {
     }
 
     private PushPayload getPayload(String registrationId, String message, HashMap extras) {
+        if(extras == null){
+            extras = new HashMap();
+        }
         return PushPayload.newBuilder()
                 .setPlatform(Platform.all())
                 .setAudience(Audience.registrationId(registrationId))
-                .setMessage(Message.newBuilder().setMsgContent(message).addExtras(extras).build())
+                .setMessage(Message.newBuilder().setMsgContent(message)
+                        .addExtras(extras).build())
                 .build();
     }
 
