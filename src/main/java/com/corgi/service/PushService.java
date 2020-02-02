@@ -64,6 +64,11 @@ public class PushService {
                     if (error == null || error.getCode() != 2002) {
                         break;
                     }
+                    try {
+                        Thread.sleep(500L);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             } catch (APIConnectionException e) {
                 e.printStackTrace();
