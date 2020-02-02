@@ -8,6 +8,9 @@ import cn.jpush.api.push.model.Message;
 import cn.jpush.api.push.model.Platform;
 import cn.jpush.api.push.model.PushPayload;
 import cn.jpush.api.push.model.audience.Audience;
+import cn.jpush.api.push.model.notification.AndroidNotification;
+import cn.jpush.api.push.model.notification.IosNotification;
+import cn.jpush.api.push.model.notification.Notification;
 import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.messages.PushMessage;
@@ -18,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.xml.transform.Result;
 import java.util.HashMap;
 import java.util.List;
 
@@ -53,8 +57,14 @@ public class PushService {
         }
         if (payload != null) {
             try {
-                PushResult result = jpushClient.sendPush(payload);
-                log.info("send message: {}, result: {}", pushMessage, result);
+                for (int i = 0; i < 10; i++) {
+                    PushResult result = jpushClient.sendPush(payload);
+                    PushResult.Error error = result.error;
+                    log.info("send message: {}, result: {}", pushMessage, result);
+                    if (error == null || error.getCode() != 2002) {
+                        break;
+                    }
+                }
             } catch (APIConnectionException e) {
                 e.printStackTrace();
             } catch (APIRequestException e) {
@@ -72,6 +82,12 @@ public class PushService {
                 .setAudience(Audience.registrationId(registrationId))
                 .setMessage(Message.newBuilder().setMsgContent(message)
                         .addExtras(extras).build())
+                .setNotification(Notification.newBuilder()
+                        .addPlatformNotification((AndroidNotification.newBuilder().setAlert(message).addExtras(extras))
+                                .setTitle("corgi").build())
+                        .addPlatformNotification((IosNotification.newBuilder().setAlert(message).addExtras(extras))
+                                .build())
+                        .build())
                 .build();
     }
 
