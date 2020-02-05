@@ -60,7 +60,7 @@ public class PushService {
                 for (int i = 0; i < 10; i++) {
                     PushResult result = jpushClient.sendPush(payload);
                     PushResult.Error error = result.error;
-                    log.info("send message: {}, result: {}", pushMessage, result);
+                    log.info("send message: {}, result: {}", payload, result);
                     if (error == null || error.getCode() != 2002) {
                         break;
                     }
