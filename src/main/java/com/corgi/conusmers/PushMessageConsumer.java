@@ -49,10 +49,10 @@ public class PushMessageConsumer {
             HashMap extra = pushMessage.getExtra();
             extra.put("userId",pushMessage.getSourceUserId());
             if (count < 2) {
-                extra.put("type",PushMessage.FOLLOW_MESSAGE_TYPE);
+                extra.put("type",PushMessage.FOLLOW_MESSAGE_TYPE+"");
                 pushMessage.setMessage(PushMessage.FOLLOW_MESSAGE);
             } else {
-                extra.put("type",PushMessage.MATCH_MESSAGE_TYPE);
+                extra.put("type",PushMessage.MATCH_MESSAGE_TYPE+"");
                 pushMessage.setMessage(PushMessage.MATCH_MESSAGE);
             }
             pushService.sendMessage(pushMessage);
