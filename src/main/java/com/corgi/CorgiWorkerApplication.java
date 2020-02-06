@@ -33,6 +33,11 @@ public class CorgiWorkerApplication {
     }
 
     @Bean
+    public Queue traceFollowQueue() {
+        return new Queue(CorgiQueueName.TRACE_FOLLOW_QUEUE);
+    }
+
+    @Bean
     public Queue pushMessageQueue() {
         return new Queue(CorgiQueueName.PUSH_MESSAGE_QUEUE);
     }
