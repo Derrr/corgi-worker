@@ -46,7 +46,7 @@ public class PushMessageConsumer {
         log.info("received message: " + pushMessage);
         if (PushMessage.FOLLOW.equals(pushMessage.getType())) {
             int count = corgiUserFollowService.isFollowed(pushMessage.getSourceUserId(), pushMessage.getTargetUserId());
-            HashMap extra = new HashMap();
+            HashMap extra = pushMessage.getExtra();
             extra.put("userId",pushMessage.getSourceUserId());
             if (count < 2) {
                 extra.put("type",PushMessage.FOLLOW_MESSAGE_TYPE);
