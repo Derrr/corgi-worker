@@ -69,6 +69,9 @@ public class TraceFollowConsumer {
     void countUserTrace(TraceFollow traceFollow) {
         long now = System.currentTimeMillis();
         UserTrace lastTrace = this.getLastUserTrace(traceFollow.getUserId());
+        if (lastTrace == null) {
+            return;
+        }
         if (now - lastTrace.getUptime() > MIN_INTERVAL) {
             lastTrace.setStayCount(lastTrace.getStayCount() + 1);
             lastTrace.setUptime(now);
