@@ -50,6 +50,7 @@ public class UserMatchRefreshConsumer {
         UserDetail loginUserDetail = corgiUserService.getUserDetail(userId);
         do {
             userMatchList = corgiUserMatchService.getUserMatchByPage(userId, start, size);
+            start += size;
             if (!CollectionUtils.isEmpty(userMatchList)) {
                 for (UserMatch userMatch : userMatchList) {
                     UserDetail userDetail1 = getUserDetail(userId, userMatch.getUserId1(), loginUserDetail);
