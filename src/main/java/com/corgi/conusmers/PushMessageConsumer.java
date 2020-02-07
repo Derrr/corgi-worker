@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 /**
  * @author tairanliu
  */
@@ -47,12 +48,12 @@ public class PushMessageConsumer {
         if (PushMessage.FOLLOW.equals(pushMessage.getType())) {
             int count = corgiUserFollowService.isFollowed(pushMessage.getSourceUserId(), pushMessage.getTargetUserId());
             HashMap extra = pushMessage.getExtra();
-            extra.put("userId",pushMessage.getSourceUserId());
+            extra.put("userId", pushMessage.getSourceUserId());
             if (count < 2) {
-                extra.put("type",PushMessage.FOLLOW_MESSAGE_TYPE+"");
+                extra.put("type", PushMessage.FOLLOW_MESSAGE_TYPE + "");
                 pushMessage.setMessage(PushMessage.FOLLOW_MESSAGE);
             } else {
-                extra.put("type",PushMessage.MATCH_MESSAGE_TYPE+"");
+                extra.put("type", PushMessage.MATCH_MESSAGE_TYPE + "");
                 pushMessage.setMessage(PushMessage.MATCH_MESSAGE);
             }
             pushService.sendMessage(pushMessage);
@@ -78,6 +79,7 @@ public class PushMessageConsumer {
             int pageSize = 500;
             while (true) {
                 userProfiles = corgiUserFollowService.getFollowedUserByPage(pushMessage.getSourceUserId(), 0L, page, pageSize);
+                page++;
                 sendBatch(userProfiles, pushMessage);
                 if (CollectionUtils.isEmpty(userProfiles) || userProfiles.size() < pageSize) {
                     break;
