@@ -56,7 +56,7 @@ public class UserMatchRefreshConsumer {
                     UserDetail userDetail1 = getUserDetail(userId, userMatch.getUserId1(), loginUserDetail);
                     UserDetail userDetail2 = getUserDetail(userId, userMatch.getUserId2(), loginUserDetail);
                     if (userDetail1 == null || userDetail2 == null) {
-                        return;
+                        continue;
                     }
                     Double match = corgiUserMatchService.calculateUserMatchByDetail(userDetail1, userDetail2);
                     userMatch.setMatch(match);
