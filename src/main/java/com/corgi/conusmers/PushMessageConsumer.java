@@ -80,6 +80,7 @@ public class PushMessageConsumer {
             while (true) {
                 userProfiles = corgiUserFollowService.getFollowedUserByPage(pushMessage.getSourceUserId(), 0L, page, pageSize);
                 page++;
+                log.info("profiles=" + userProfiles);
                 sendBatch(userProfiles, pushMessage);
                 if (CollectionUtils.isEmpty(userProfiles) || userProfiles.size() < pageSize) {
                     break;
@@ -99,7 +100,7 @@ public class PushMessageConsumer {
         List<String> registrationIds = new ArrayList<>();
         String nowTime = System.currentTimeMillis() + "";
         for (UserProfile userProfile : userProfileList) {
-            if(userProfile == null){
+            if (userProfile == null) {
                 continue;
             }
             Long time = userProfile.getTime();
