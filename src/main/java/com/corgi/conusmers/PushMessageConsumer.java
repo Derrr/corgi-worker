@@ -99,6 +99,9 @@ public class PushMessageConsumer {
         List<String> registrationIds = new ArrayList<>();
         String nowTime = System.currentTimeMillis() + "";
         for (UserProfile userProfile : userProfileList) {
+            if(userProfile == null){
+                continue;
+            }
             Long time = userProfile.getTime();
             String key = "activitysent_" + userProfile.getUserId();
             String sentTime = redisTemplate.opsForValue().get(key);
