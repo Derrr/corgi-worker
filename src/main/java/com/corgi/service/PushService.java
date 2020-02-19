@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import javax.xml.transform.Result;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author tairanliu
@@ -43,7 +44,12 @@ public class PushService {
 
     public void sendMessage(PushMessage pushMessage, List<String> userIds) {
         String message = pushMessage.getMessage();
-        HashMap extras = pushMessage.getExtra();
+        HashMap<String, Object> extras = pushMessage.getExtra();
+        if (extras != null) {
+            for (Map.Entry entry : extras.entrySet()) {
+                entry.setValue(entry.getValue() + "");
+            }
+        }
         PushPayload payload = null;
         if (CollectionUtils.isEmpty(userIds) && pushMessage.getTargetUserId() != null) {
             String userId = pushMessage.getTargetUserId();
