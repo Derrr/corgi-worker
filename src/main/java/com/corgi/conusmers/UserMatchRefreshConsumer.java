@@ -47,7 +47,7 @@ public class UserMatchRefreshConsumer {
         int size = 1000;
         int start = 0;
         List<UserMatch> userMatchList;
-        UserDetail loginUserDetail = corgiUserService.getUserDetail(userId);
+        UserDetail loginUserDetail = corgiUserService.getUserDetail(userId, null);
         do {
             userMatchList = corgiUserMatchService.getUserMatchByPage(userId, start, size);
             start += size;
@@ -75,7 +75,7 @@ public class UserMatchRefreshConsumer {
 
     private UserDetail getUserDetail(String loginUserId, String userId, UserDetail loginUserDetail) {
         if (!loginUserId.equals(userId)) {
-            return corgiUserService.getUserDetail(userId);
+            return corgiUserService.getUserDetail(userId, null);
         }
         return loginUserDetail;
     }
