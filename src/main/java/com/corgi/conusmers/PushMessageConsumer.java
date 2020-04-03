@@ -6,11 +6,13 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.service.PushService;
+import com.corgi.user.api.CorgiUserActivityService;
 import com.corgi.user.api.CorgiUserFollowService;
 import com.corgi.user.api.CorgiUserMatchService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.UserProfile;
 import com.corgi.user.entity.UserQuery;
+import com.corgi.user.entity.UserSignUp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -35,6 +37,8 @@ public class PushMessageConsumer {
     private PushService pushService;
     @Reference
     private CorgiUserFollowService corgiUserFollowService;
+    @Reference
+    private CorgiUserActivityService corgiUserActivityService;
     @Reference
     private CorgiUserService corgiUserService;
     @Reference
@@ -80,12 +84,15 @@ public class PushMessageConsumer {
             while (true) {
                 userProfiles = corgiUserFollowService.getFollowedUserByPage(pushMessage.getSourceUserId(), 0L, page, pageSize);
                 page++;
-                log.info("profiles=" + userProfiles);
                 sendBatch(userProfiles, pushMessage);
                 if (CollectionUtils.isEmpty(userProfiles) || userProfiles.size() < pageSize) {
                     break;
                 }
             }
+        } else if (PushMessage.ACTIVITY_DUEL.equals(pushMessage.getType())) {
+            String activityId = pushMessage.getSourceUserId();
+            List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, null, UserSignUp.AGREE + "");
+            sendBatch(userProfiles, pushMessage);
         } else {
             pushService.sendMessage(pushMessage);
         }
@@ -103,12 +110,13 @@ public class PushMessageConsumer {
             if (userProfile == null) {
                 continue;
             }
-            Long time = userProfile.getTime();
-            String key = "activitysent_" + userProfile.getUserId();
+            String key = pushMessage.getType() + userProfile.getUserId() + pushMessage.getSourceUserId();
             String sentTime = redisTemplate.opsForValue().get(key);
-            if (StringUtils.isEmpty(sentTime) || Long.valueOf(sentTime) < time) {
+            Long time = userProfile.getTime();
+            if (StringUtils.isEmpty(sentTime)
+                    || (PushMessage.ACTIVITY.equals(pushMessage.getType()) && time != null && time > Long.valueOf(sentTime))) {
                 registrationIds.add(userProfile.getImId());
-                redisTemplate.opsForValue().set(key, nowTime, 100L, TimeUnit.DAYS);
+                redisTemplate.opsForValue().set(key, nowTime, 2L, TimeUnit.HOURS);
             }
         }
         if (CollectionUtils.isNotEmpty(registrationIds)) {
