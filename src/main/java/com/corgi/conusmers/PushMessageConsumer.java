@@ -89,10 +89,6 @@ public class PushMessageConsumer {
                     break;
                 }
             }
-        } else if (PushMessage.ACTIVITY_DUEL.equals(pushMessage.getType())) {
-            String activityId = pushMessage.getSourceUserId();
-            List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, null, UserSignUp.AGREE + "");
-            sendBatch(userProfiles, pushMessage);
         } else {
             pushService.sendMessage(pushMessage);
         }
@@ -110,11 +106,10 @@ public class PushMessageConsumer {
             if (userProfile == null) {
                 continue;
             }
-            String key = pushMessage.getType() + userProfile.getUserId() + pushMessage.getSourceUserId();
+            String key = "activitysent_" + userProfile.getUserId();
             String sentTime = redisTemplate.opsForValue().get(key);
             Long time = userProfile.getTime();
-            if (StringUtils.isEmpty(sentTime)
-                    || (PushMessage.ACTIVITY.equals(pushMessage.getType()) && time != null && time > Long.valueOf(sentTime))) {
+            if (StringUtils.isEmpty(sentTime) || time > Long.valueOf(sentTime)) {
                 registrationIds.add(userProfile.getImId());
                 redisTemplate.opsForValue().set(key, nowTime, 2L, TimeUnit.HOURS);
             }

@@ -16,12 +16,10 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.UserLogin;
-import com.corgi.user.entity.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.xml.transform.Result;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
