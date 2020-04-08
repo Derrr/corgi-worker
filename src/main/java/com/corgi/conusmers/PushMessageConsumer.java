@@ -59,13 +59,12 @@ public class PushMessageConsumer {
             } else {
                 extra.put("type", PushMessage.MATCH_MESSAGE_TYPE + "");
                 pushMessage.setMessage(PushMessage.MATCH_MESSAGE);
-
-                extra.put("userId", pushMessage.getTargetUserId());
+                
                 //调换发送者和接受者
                 String sourceId = pushMessage.getTargetUserId();
                 pushMessage.setTargetUserId(pushMessage.getSourceUserId());
                 pushMessage.setSourceUserId(sourceId);
-                
+                extra.put("userId", sourceId);
                 pushMessage.setMessage(PushMessage.MATCH_MESSAGE);
             }
             pushService.sendMessage(pushMessage);
