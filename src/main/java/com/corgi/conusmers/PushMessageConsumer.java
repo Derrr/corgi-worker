@@ -59,7 +59,7 @@ public class PushMessageConsumer {
             } else {
                 extra.put("type", PushMessage.MATCH_MESSAGE_TYPE + "");
                 pushMessage.setMessage(PushMessage.MATCH_MESSAGE);
-                
+
                 //调换发送者和接受者
                 String sourceId = pushMessage.getTargetUserId();
                 pushMessage.setTargetUserId(pushMessage.getSourceUserId());
