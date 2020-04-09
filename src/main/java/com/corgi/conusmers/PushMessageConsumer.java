@@ -61,11 +61,11 @@ public class PushMessageConsumer {
                 pushMessage.setMessage(PushMessage.MATCH_MESSAGE);
 
                 //调换发送者和接受者
-//                String sourceId = pushMessage.getTargetUserId();
-//                pushMessage.setTargetUserId(pushMessage.getSourceUserId());
-//                pushMessage.setSourceUserId(sourceId);
-//                extra.put("userId", sourceId);
-//                pushMessage.setMessage(PushMessage.MATCH_MESSAGE);
+                String sourceId = pushMessage.getTargetUserId();
+                pushMessage.setTargetUserId(pushMessage.getSourceUserId());
+                pushMessage.setSourceUserId(sourceId);
+                extra.put("userId", sourceId);
+                pushMessage.setMessage(PushMessage.MATCH_MESSAGE);
             }
             pushService.sendMessage(pushMessage);
         } else if (PushMessage.MATCH.equals(pushMessage.getType())) {
