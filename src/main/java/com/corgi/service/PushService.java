@@ -36,9 +36,7 @@ import org.springframework.util.StringUtils;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -81,6 +79,15 @@ public class PushService {
         HashMap extra = pushMessage.getExtra();
         if (extra == null) {
             extra = new HashMap();
+        }
+        if (CollectionUtils.isEmpty(userIds)) {
+            userIds = Arrays.asList("corgi" + pushMessage.getTargetUserId());
+        } else {
+            List<String> tmpUserIds = new ArrayList<>();
+            for (String userId : userIds) {
+                tmpUserIds.add("corgi" + userId);
+            }
+            userIds = tmpUserIds;
         }
         String url = HOST + orgName + "/" + appName + MESSAGE_URL;
         HashMap message = new HashMap();
