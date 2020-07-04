@@ -1,10 +1,7 @@
 package com.corgi;
 
-import cn.jiguang.common.ClientConfig;
-import cn.jpush.api.JPushClient;
 import com.alibaba.dubbo.spring.boot.annotation.EnableDubboConfiguration;
 import com.corgi.common.CorgiQueueName;
-import io.netty.buffer.ByteBuf;
 import org.springframework.amqp.core.Queue;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -42,9 +39,9 @@ public class CorgiWorkerApplication {
         return new Queue(CorgiQueueName.PUSH_MESSAGE_QUEUE);
     }
 
-    @Bean
-    public JPushClient getJPushClient(){
-        JPushClient jpushClient = new JPushClient(MASTER_SECRET, APP_KEY, null, ClientConfig.getInstance());
-        return jpushClient;
-    }
+//    @Bean
+//    public JPushClient getJPushClient(){
+//        JPushClient jpushClient = new JPushClient(MASTER_SECRET, APP_KEY, null, ClientConfig.getInstance());
+//        return jpushClient;
+//    }
 }
