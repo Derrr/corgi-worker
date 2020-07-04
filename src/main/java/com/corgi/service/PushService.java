@@ -1,16 +1,5 @@
 package com.corgi.service;
 
-import cn.jiguang.common.resp.APIConnectionException;
-import cn.jiguang.common.resp.APIRequestException;
-import cn.jpush.api.JPushClient;
-import cn.jpush.api.push.PushResult;
-import cn.jpush.api.push.model.Message;
-import cn.jpush.api.push.model.Platform;
-import cn.jpush.api.push.model.PushPayload;
-import cn.jpush.api.push.model.audience.Audience;
-import cn.jpush.api.push.model.notification.AndroidNotification;
-import cn.jpush.api.push.model.notification.IosNotification;
-import cn.jpush.api.push.model.notification.Notification;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
@@ -142,7 +131,7 @@ public class PushService {
                 httpPost.setHeader("Authorization", "Bearer " + token);
             }
             log.info("request: {} ", JSONObject.toJSONString(message));
-            StringEntity stringEntity = new StringEntity(JSONObject.toJSONString(message));
+            StringEntity stringEntity = new StringEntity(JSONObject.toJSONString(message),Charset.forName("UTF-8"));
             stringEntity.setContentType("application/json;charset=UTF-8");
 
             httpPost.setEntity(stringEntity);
