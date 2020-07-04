@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -94,7 +95,11 @@ public class PushService {
         message.put("target_type", "users");
         message.put("target", userIds);
         HashMap msg = new HashMap();
-        msg.put("msg", pushMessage.getMessage());
+        try {
+            msg.put("msg", new String(pushMessage.getMessage().getBytes(), "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            log.error(e.getMessage(), e);
+        }
         msg.put("type", "txt");
         message.put("msg", msg);
         message.put("ext", extra);
