@@ -64,7 +64,7 @@ public class UserMatchRefreshConsumer {
                     String matchKey = CorgiConstants.getUserMatchKey(userDetail1.getUserId(), userDetail2.getUserId());
                     Long expire = redisTemplate.getExpire(matchKey);
                     if (expire > 0) {
-                        redisTemplate.opsForValue().set(matchKey, match.toString(), expire - System.currentTimeMillis()/1000,TimeUnit.SECONDS);
+                        redisTemplate.opsForValue().set(matchKey, match.toString(), expire, TimeUnit.SECONDS);
                     }
                 }
             } else {
