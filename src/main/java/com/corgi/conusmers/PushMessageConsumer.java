@@ -72,34 +72,41 @@ public class PushMessageConsumer {
             List<String> userIds = getUserProfileList(pushMessage);
             if (CollectionUtils.isNotEmpty(userIds)) {
                 for (String userId : userIds) {
+                    String key = "match85sent_" + pushMessage.getSourceUserId() + "_" + userId;
+                    String result = redisTemplate.opsForValue().get(key);
+                    if (StringUtils.isNotEmpty(result)) {
+                        continue;
+                    }
                     Double match = corgiUserMatchService.getUserMatch(userId, pushMessage.getSourceUserId());
-                    if (match >= 90) {
-                        String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + userId;
-                        String result = redisTemplate.opsForValue().get(key);
-                        if (StringUtils.isNotEmpty(result)) {
-                            pushMessage.setTargetUserId(userId);
-                            pushService.sendMessage(pushMessage);
-                            redisTemplate.opsForValue().set(key, System.currentTimeMillis() + "", 100L, TimeUnit.DAYS);
-                        }
+                    if (match >= 85) {
+                        pushMessage.setTargetUserId(userId);
+                        pushService.sendMessage(pushMessage);
+                        redisTemplate.opsForValue().set(key, System.currentTimeMillis() + "", 1L, TimeUnit.DAYS);
                     }
                 }
             }
         } else if (PushMessage.ACTIVITY.equals(pushMessage.getType())) {
-            List<UserProfile> userProfiles;
-            int page = 1;
-            int pageSize = 500;
-            while (true) {
-                userProfiles = corgiUserFollowService.getFollowedUserByPage(pushMessage.getSourceUserId(), 0L, page, pageSize);
-                page++;
-                sendBatch(userProfiles, pushMessage);
-                if (CollectionUtils.isEmpty(userProfiles) || userProfiles.size() < pageSize) {
-                    break;
-                }
-            }
+            sendFollowed(pushMessage);
+        } else if (PushMessage.CITY.equals(pushMessage.getType())) {
+            sendFollowed(pushMessage);
         } else {
             pushService.sendMessage(pushMessage);
         }
 
+    }
+
+    private void sendFollowed(PushMessage pushMessage) {
+        List<UserProfile> userProfiles;
+        int page = 1;
+        int pageSize = 500;
+        while (true) {
+            userProfiles = corgiUserFollowService.getFollowedUserByPage(pushMessage.getSourceUserId(), 0L, page, pageSize);
+            page++;
+            sendBatch(userProfiles, pushMessage);
+            if (CollectionUtils.isEmpty(userProfiles) || userProfiles.size() < pageSize) {
+                break;
+            }
+        }
     }
 
     private void sendBatch(List<UserProfile> userProfileList, PushMessage pushMessage) {
@@ -108,18 +115,11 @@ public class PushMessageConsumer {
         }
 
         List<String> registrationIds = new ArrayList<>();
-        String nowTime = System.currentTimeMillis() + "";
         for (UserProfile userProfile : userProfileList) {
             if (userProfile == null) {
                 continue;
             }
-            String key = "activitysent_" + userProfile.getUserId();
-            String sentTime = redisTemplate.opsForValue().get(key);
-            Long time = userProfile.getTime();
-            if (StringUtils.isEmpty(sentTime) || time > Long.valueOf(sentTime)) {
-                registrationIds.add(userProfile.getImId());
-                redisTemplate.opsForValue().set(key, nowTime, 2L, TimeUnit.HOURS);
-            }
+            registrationIds.add(userProfile.getUserId());
         }
         if (CollectionUtils.isNotEmpty(registrationIds)) {
             pushService.sendMessage(pushMessage, registrationIds);
@@ -134,7 +134,7 @@ public class PushMessageConsumer {
         userQuery.setLat(lat);
         userQuery.setLng(lng);
         userQuery.setUserId(pushMessage.getSourceUserId());
-        userQuery.setRange(5.0);
+        userQuery.setRange(3.0);
         return corgiUserService.getAllNearByUser(userQuery);
     }
 }
