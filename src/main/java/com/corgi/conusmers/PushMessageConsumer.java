@@ -10,6 +10,7 @@ import com.corgi.user.api.CorgiUserActivityService;
 import com.corgi.user.api.CorgiUserFollowService;
 import com.corgi.user.api.CorgiUserMatchService;
 import com.corgi.user.api.CorgiUserService;
+import com.corgi.user.entity.UserPosition;
 import com.corgi.user.entity.UserProfile;
 import com.corgi.user.entity.UserQuery;
 import com.corgi.user.entity.UserSignUp;
@@ -89,7 +90,17 @@ public class PushMessageConsumer {
         } else if (PushMessage.ACTIVITY.equals(pushMessage.getType())) {
             sendFollowed(pushMessage);
         } else if (PushMessage.CITY.equals(pushMessage.getType())) {
-            sendFollowed(pushMessage);
+            String city = (String) pushMessage.getExtra().get("city");
+            int page = 1;
+            int pageSize = 500;
+            while (true) {
+                List<UserPosition> userPositions = corgiUserService.getFollowedCityUser(pushMessage.getSourceUserId(), city, page, pageSize);
+                page++;
+                sendBatchPosition(userPositions, pushMessage);
+                if (CollectionUtils.isEmpty(userPositions) || userPositions.size() < pageSize) {
+                    break;
+                }
+            }
         } else {
             pushService.sendMessage(pushMessage);
         }
@@ -110,11 +121,26 @@ public class PushMessageConsumer {
         }
     }
 
+    private void sendBatchPosition(List<UserPosition> userPositions, PushMessage pushMessage) {
+        if (CollectionUtils.isEmpty(userPositions)) {
+            return;
+        }
+        List<String> registrationIds = new ArrayList<>();
+        for (UserPosition userPosition : userPositions) {
+            if (userPosition == null) {
+                continue;
+            }
+            registrationIds.add(userPosition.getUserId());
+        }
+        if (CollectionUtils.isNotEmpty(registrationIds)) {
+            pushService.sendMessage(pushMessage, registrationIds);
+        }
+    }
+
     private void sendBatch(List<UserProfile> userProfileList, PushMessage pushMessage) {
         if (CollectionUtils.isEmpty(userProfileList)) {
             return;
         }
-
         List<String> registrationIds = new ArrayList<>();
         for (UserProfile userProfile : userProfileList) {
             if (userProfile == null) {
