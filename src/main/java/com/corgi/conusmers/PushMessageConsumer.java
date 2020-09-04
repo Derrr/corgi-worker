@@ -6,14 +6,8 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.service.PushService;
-import com.corgi.user.api.CorgiUserActivityService;
-import com.corgi.user.api.CorgiUserFollowService;
-import com.corgi.user.api.CorgiUserMatchService;
-import com.corgi.user.api.CorgiUserService;
-import com.corgi.user.entity.UserPosition;
-import com.corgi.user.entity.UserProfile;
-import com.corgi.user.entity.UserQuery;
-import com.corgi.user.entity.UserSignUp;
+import com.corgi.user.api.*;
+import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -44,6 +38,8 @@ public class PushMessageConsumer {
     private CorgiUserService corgiUserService;
     @Reference
     private CorgiUserMatchService corgiUserMatchService;
+    @Reference
+    private CorgiPushLogService corgiPushLogService;
     @Autowired
     private StringRedisTemplate redisTemplate;
 
@@ -79,11 +75,14 @@ public class PushMessageConsumer {
                         continue;
                     }
                     int match = corgiUserFollowService.isFollowed(pushMessage.getSourceUserId(), userId);
-                    //Double match = corgiUserMatchService.getUserMatch(userId, pushMessage.getSourceUserId());
                     if (match >= 3) {
                         pushMessage.setTargetUserId(userId);
                         pushService.sendMessage(pushMessage);
                         redisTemplate.opsForValue().set(key, System.currentTimeMillis() + "", 1L, TimeUnit.DAYS);
+                        PushLog pushLog = new PushLog();
+                        pushLog.setFrom(pushMessage.getSourceUserId());
+                        pushLog.setTo(userId);
+                        corgiPushLogService.addPushLog(pushLog);
                     }
                 }
             }
@@ -93,14 +92,14 @@ public class PushMessageConsumer {
             String city = (String) pushMessage.getExtra().get("city");
             int page = 1;
             int pageSize = 500;
-            while (true) {
-                List<UserPosition> userPositions = corgiUserService.getFollowedCityUser(pushMessage.getSourceUserId(), city, page, pageSize);
-                page++;
-                sendBatchPosition(userPositions, pushMessage);
-                if (CollectionUtils.isEmpty(userPositions) || userPositions.size() < pageSize) {
-                    break;
-                }
-            }
+//            while (true) {
+//                List<UserPosition> userPositions = corgiUserService.getFollowedCityUser(pushMessage.getSourceUserId(), city, page, pageSize);
+//                page++;
+//                sendBatchPosition(userPositions, pushMessage);
+//                if (CollectionUtils.isEmpty(userPositions) || userPositions.size() < pageSize) {
+//                    break;
+//                }
+//            }
         } else {
             pushService.sendMessage(pushMessage);
         }
