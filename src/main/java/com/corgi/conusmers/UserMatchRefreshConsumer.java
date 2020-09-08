@@ -41,7 +41,7 @@ public class UserMatchRefreshConsumer {
     @RabbitHandler
     public void process(Channel channel, Message message, MatchRefresher refresher) {
         String userId = refresher.getUserId();
-        if (StringUtils.isEmpty(userId)) {
+        if (!StringUtils.isEmpty(userId)) {
             return;
         }
         int size = 1000;
