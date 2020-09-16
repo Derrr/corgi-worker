@@ -42,6 +42,7 @@ public class PushService {
     private static final String TOKEN_URL = "/token";
     private final static PoolingHttpClientConnectionManager poolConnManager = new PoolingHttpClientConnectionManager();
     public static ThreadLocal<String> RESULT = new ThreadLocal<>();
+    public static final String HELPER = "corgihelper";
 
     @Autowired
     private StringRedisTemplate redisTemplate;
@@ -81,6 +82,9 @@ public class PushService {
         }
         String url = HOST + orgName + "/" + appName + MESSAGE_URL;
         HashMap message = new HashMap();
+        if(HELPER.equals(pushMessage.getSourceUserId())){
+            message.put("from", pushMessage.getSourceUserId());
+        }
         message.put("target_type", "users");
         message.put("target", userIds);
         HashMap msg = new HashMap();

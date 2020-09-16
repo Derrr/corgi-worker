@@ -92,14 +92,14 @@ public class PushMessageConsumer {
             String city = (String) pushMessage.getExtra().get("city");
             int page = 1;
             int pageSize = 500;
-//            while (true) {
-//                List<UserPosition> userPositions = corgiUserService.getFollowedCityUser(pushMessage.getSourceUserId(), city, page, pageSize);
-//                page++;
-//                sendBatchPosition(userPositions, pushMessage);
-//                if (CollectionUtils.isEmpty(userPositions) || userPositions.size() < pageSize) {
-//                    break;
-//                }
-//            }
+            while (true) {
+                List<UserPosition> userPositions = corgiUserService.getFollowedCityUser(pushMessage.getSourceUserId(), city, page, pageSize);
+                page++;
+                sendBatchPosition(userPositions, pushMessage);
+                if (CollectionUtils.isEmpty(userPositions) || userPositions.size() < pageSize) {
+                    break;
+                }
+            }
         } else {
             pushService.sendMessage(pushMessage);
         }
@@ -110,8 +110,10 @@ public class PushMessageConsumer {
         List<UserProfile> userProfiles;
         int page = 1;
         int pageSize = 500;
+        String sourceId = pushMessage.getSourceUserId();
+        pushMessage.setSourceUserId(PushService.HELPER);
         while (true) {
-            userProfiles = corgiUserFollowService.getFollowedUserByPage(pushMessage.getSourceUserId(), 0L, page, pageSize);
+            userProfiles = corgiUserFollowService.getFollowedUserByPage(sourceId, 0L, page, pageSize);
             page++;
             sendBatch(userProfiles, pushMessage);
             if (CollectionUtils.isEmpty(userProfiles) || userProfiles.size() < pageSize) {
@@ -132,6 +134,7 @@ public class PushMessageConsumer {
             registrationIds.add(userPosition.getUserId());
         }
         if (CollectionUtils.isNotEmpty(registrationIds)) {
+            pushMessage.setSourceUserId(PushService.HELPER);
             pushService.sendMessage(pushMessage, registrationIds);
         }
     }
