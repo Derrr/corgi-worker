@@ -88,6 +88,8 @@ public class PushMessageConsumer {
             }
         } else if (PushMessage.ACTIVITY.equals(pushMessage.getType())) {
             sendFollowed(pushMessage);
+        } else if (PushMessage.ACTIVITY.concat("test").equals(pushMessage.getType())) {
+            sendFollowedTest(pushMessage);
         } else if (PushMessage.CITY.equals(pushMessage.getType())) {
             String city = (String) pushMessage.getExtra().get("city");
             int page = 1;
@@ -106,12 +108,27 @@ public class PushMessageConsumer {
 
     }
 
-    private void sendFollowed(PushMessage pushMessage) {
+    private void sendFollowedTest(PushMessage pushMessage){
         List<UserProfile> userProfiles;
         int page = 1;
         int pageSize = 500;
         String sourceId = pushMessage.getSourceUserId();
         pushMessage.setSourceUserId(PushService.HELPER);
+        while (true) {
+            userProfiles = corgiUserFollowService.getFollowedUserByPage(sourceId, 0L, page, pageSize);
+            page++;
+            sendBatch(userProfiles, pushMessage);
+            if (CollectionUtils.isEmpty(userProfiles) || userProfiles.size() < pageSize) {
+                break;
+            }
+        }
+    }
+
+    private void sendFollowed(PushMessage pushMessage) {
+        List<UserProfile> userProfiles;
+        int page = 1;
+        int pageSize = 500;
+        String sourceId = pushMessage.getSourceUserId();
         while (true) {
             userProfiles = corgiUserFollowService.getFollowedUserByPage(sourceId, 0L, page, pageSize);
             page++;
