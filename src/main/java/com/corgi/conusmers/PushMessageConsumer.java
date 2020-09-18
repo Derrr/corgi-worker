@@ -108,7 +108,7 @@ public class PushMessageConsumer {
 
     }
 
-    private void sendFollowedTest(PushMessage pushMessage){
+    private void sendFollowedTest(PushMessage pushMessage) {
         List<UserProfile> userProfiles;
         int page = 1;
         int pageSize = 500;
@@ -175,7 +175,13 @@ public class PushMessageConsumer {
     private List<String> getUserProfileList(PushMessage pushMessage) {
         HashMap extra = pushMessage.getExtra();
         Double lat = Double.valueOf(extra.get("lat").toString());
+        if (lat > 200) {
+            return new ArrayList<>();
+        }
         Double lng = Double.valueOf(extra.get("lng").toString());
+        if (lng > 200) {
+            return new ArrayList<>();
+        }
         UserQuery userQuery = new UserQuery();
         userQuery.setLat(lat);
         userQuery.setLng(lng);
