@@ -70,15 +70,14 @@ public class PushMessageConsumer {
             if (CollectionUtils.isNotEmpty(userIds)) {
                 for (String userId : userIds) {
                     String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + userId;
-                    String result = redisTemplate.opsForValue().get(key);
-                    if (StringUtils.isNotEmpty(result)) {
+                    Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "1", 1L, TimeUnit.DAYS);
+                    if (!result) {
                         continue;
                     }
                     int match = corgiUserFollowService.isFollowed(pushMessage.getSourceUserId(), userId);
                     if (match >= 3) {
                         pushMessage.setTargetUserId(userId);
                         pushService.sendMessage(pushMessage);
-                        redisTemplate.opsForValue().set(key, System.currentTimeMillis() + "", 1L, TimeUnit.DAYS);
                         PushLog pushLog = new PushLog();
                         pushLog.setFrom(pushMessage.getSourceUserId());
                         pushLog.setTo(userId);
