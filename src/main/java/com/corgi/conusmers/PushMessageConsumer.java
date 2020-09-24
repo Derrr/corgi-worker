@@ -87,14 +87,16 @@ public class PushMessageConsumer {
             }
         } else if (PushMessage.ACTIVITY.equals(pushMessage.getType())) {
             sendFollowed(pushMessage);
-        } else if (PushMessage.ACTIVITY.concat("test").equals(pushMessage.getType())) {
-            sendFollowedTest(pushMessage);
+        } else if (PushMessage.ACTIVITY.concat("_city").equals(pushMessage.getType())) {
+            String city = (String) pushMessage.getExtra().get("city");
+            sendFollowedCity(pushMessage, city);
         } else if (PushMessage.CITY.equals(pushMessage.getType())) {
             String city = (String) pushMessage.getExtra().get("city");
+            pushMessage.setSourceUserId(PushService.HELPER);
             int page = 1;
             int pageSize = 500;
             while (true) {
-                List<UserPosition> userPositions = corgiUserService.getFollowedCityUser(pushMessage.getSourceUserId(), city, page, pageSize);
+                List<UserPosition> userPositions = corgiUserService.getFollowedCityUser(null, city, page, pageSize);
                 page++;
                 sendBatchPosition(userPositions, pushMessage);
                 if (CollectionUtils.isEmpty(userPositions) || userPositions.size() < pageSize) {
@@ -104,20 +106,18 @@ public class PushMessageConsumer {
         } else {
             pushService.sendMessage(pushMessage);
         }
-
     }
 
-    private void sendFollowedTest(PushMessage pushMessage) {
-        List<UserProfile> userProfiles;
+    private void sendFollowedCity(PushMessage pushMessage, String city) {
         int page = 1;
         int pageSize = 500;
         String sourceId = pushMessage.getSourceUserId();
         pushMessage.setSourceUserId(PushService.HELPER);
         while (true) {
-            userProfiles = corgiUserFollowService.getFollowedUserByPage(sourceId, 0L, page, pageSize);
+            List<UserPosition> userPositions = corgiUserService.getFollowedCityUser(sourceId, city, page, pageSize);
             page++;
-            sendBatch(userProfiles, pushMessage);
-            if (CollectionUtils.isEmpty(userProfiles) || userProfiles.size() < pageSize) {
+            sendBatchPosition(userPositions, pushMessage);
+            if (CollectionUtils.isEmpty(userPositions) || userPositions.size() < pageSize) {
                 break;
             }
         }
@@ -154,6 +154,7 @@ public class PushMessageConsumer {
             pushService.sendMessage(pushMessage, registrationIds);
         }
     }
+
 
     private void sendBatch(List<UserProfile> userProfileList, PushMessage pushMessage) {
         if (CollectionUtils.isEmpty(userProfileList)) {
