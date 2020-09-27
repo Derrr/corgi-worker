@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -92,14 +93,25 @@ public class PushMessageConsumer {
             sendFollowedCity(pushMessage, city);
         } else if (PushMessage.CITY.equals(pushMessage.getType())) {
             String city = (String) pushMessage.getExtra().get("city");
+            String userId = pushMessage.getSourceUserId();
             pushMessage.setSourceUserId(PushService.HELPER);
             int page = 1;
             int pageSize = 500;
             while (true) {
                 List<UserPosition> userPositions = corgiUserService.getFollowedCityUser(null, city, page, pageSize);
+                if (CollectionUtils.isEmpty(userPositions)) {
+                    break;
+                }
+                Iterator<UserPosition> itPosition = userPositions.iterator();
+                while (itPosition.hasNext()){
+                    UserPosition position = itPosition.next();
+                    if(userId.equals(position.getUserId())){
+                        itPosition.remove();
+                    }
+                }
                 page++;
                 sendBatchPosition(userPositions, pushMessage);
-                if (CollectionUtils.isEmpty(userPositions) || userPositions.size() < pageSize) {
+                if (userPositions.size() < pageSize) {
                     break;
                 }
             }
