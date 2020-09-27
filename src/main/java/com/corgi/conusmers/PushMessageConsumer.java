@@ -105,7 +105,7 @@ public class PushMessageConsumer {
                 Iterator<UserPosition> itPosition = userPositions.iterator();
                 while (itPosition.hasNext()){
                     UserPosition position = itPosition.next();
-                    if(userId.equals(position.getUserId())){
+                    if(position != null && userId.equals(position.getUserId())){
                         itPosition.remove();
                     }
                 }
