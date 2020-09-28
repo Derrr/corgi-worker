@@ -97,24 +97,30 @@ public class PushMessageConsumer {
             pushMessage.setSourceUserId(PushService.HELPER);
             int page = 1;
             int pageSize = 500;
+            int total = 0;
             while (true) {
                 List<UserPosition> userPositions = corgiUserService.getFollowedCityUser(null, city, page, pageSize);
                 if (CollectionUtils.isEmpty(userPositions)) {
                     break;
                 }
                 Iterator<UserPosition> itPosition = userPositions.iterator();
-                while (itPosition.hasNext()){
+                while (itPosition.hasNext()) {
                     UserPosition position = itPosition.next();
-                    if(position != null && userId.equals(position.getUserId())){
+                    if (position != null && userId.equals(position.getUserId())) {
                         itPosition.remove();
                     }
                 }
                 page++;
-                sendBatchPosition(userPositions, pushMessage);
+                total += sendBatchPosition(userPositions, pushMessage);
                 if (userPositions.size() < pageSize) {
                     break;
                 }
             }
+            PushMessage reply = new PushMessage();
+            reply.setSourceUserId(PushService.HELPER);
+            reply.setTargetUserId(userId);
+            reply.setMessage("嘿！你的“一呼百应”触发成功，已经告知了活动地点附近 " + total + " 个小哥哥哦，等待一个小红点吧");
+            pushService.sendMessage(reply);
         } else {
             pushService.sendMessage(pushMessage);
         }
@@ -150,9 +156,10 @@ public class PushMessageConsumer {
         }
     }
 
-    private void sendBatchPosition(List<UserPosition> userPositions, PushMessage pushMessage) {
+    private Integer sendBatchPosition(List<UserPosition> userPositions, PushMessage pushMessage) {
+        int i = 0;
         if (CollectionUtils.isEmpty(userPositions)) {
-            return;
+            return i;
         }
         List<String> registrationIds = new ArrayList<>();
         for (UserPosition userPosition : userPositions) {
@@ -160,11 +167,13 @@ public class PushMessageConsumer {
                 continue;
             }
             registrationIds.add(userPosition.getUserId());
+            i++;
         }
         if (CollectionUtils.isNotEmpty(registrationIds)) {
             pushMessage.setSourceUserId(PushService.HELPER);
             pushService.sendMessage(pushMessage, registrationIds);
         }
+        return i;
     }
 
 
