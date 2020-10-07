@@ -59,7 +59,7 @@ public class UserRecommendConsumer {
             for (UserProfile userProfile : userProfiles) {
                 String followerId = userProfile.getUserId();
                 corgiUserRecommendService.followRecUser(userId, followerId);
-                int page2 = 0;
+                int page2 = 1;
                 do {
                     List<UserProfile> fanProfiles = corgiUserFollowService.getFollowedUserByPage(followerId, 0L, page2, size);
                     page2++;
@@ -73,7 +73,7 @@ public class UserRecommendConsumer {
                         }
                         fanIds.add(fanId);
                         do {
-                            int page3 = 0;
+                            int page3 = 1;
                             List<UserProfile> resultProfiles = corgiUserFollowService.getFollowUserByPage(fanId, "new", 0.0, 0.0, page3, size);
                             page3++;
                             if (CollectionUtils.isEmpty(resultProfiles)) {
