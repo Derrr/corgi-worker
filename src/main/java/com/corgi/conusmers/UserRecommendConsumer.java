@@ -72,8 +72,8 @@ public class UserRecommendConsumer {
                             continue;
                         }
                         fanIds.add(fanId);
+                        int page3 = 1;
                         do {
-                            int page3 = 1;
                             List<UserProfile> resultProfiles = corgiUserFollowService.getFollowUserByPage(fanId, "new", 0.0, 0.0, page3, size);
                             page3++;
                             if (CollectionUtils.isEmpty(resultProfiles)) {
