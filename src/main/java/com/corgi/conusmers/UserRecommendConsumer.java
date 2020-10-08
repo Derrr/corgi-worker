@@ -44,7 +44,7 @@ public class UserRecommendConsumer {
     public void process(Channel channel, Message message, RecommendCalculater calculater) {
         String userId = calculater.getUserId();
         log.info("calculating... " + userId);
-        if (!StringUtils.isEmpty(userId)) {
+        if (StringUtils.isEmpty(userId)) {
             return;
         }
         corgiUserRecommendService.clearRecUser(userId);
@@ -53,9 +53,6 @@ public class UserRecommendConsumer {
         List<String> fanIds = new ArrayList<>();
         do {
             List<UserProfile> userProfiles = corgiUserFollowService.getFollowUserByPage(userId, "new", 0.0, 0.0, page1, size);
-            if (page1 == 1 && userProfiles.size() < 10) {
-                break;
-            }
             page1++;
             if (CollectionUtils.isEmpty(userProfiles)) {
                 break;
@@ -93,9 +90,11 @@ public class UserRecommendConsumer {
             }
         } while (true);
 
-        if (fanIds.size() > 0) {
-            corgiUserRecommendService.deleteRecUserByWeight(userId, fanIds.size() / 10);
+        int weight = fanIds.size() / 10;
+        if (weight < 1) {
+            weight = 1;
         }
+        corgiUserRecommendService.deleteRecUserByWeight(userId, weight);
     }
 
 }
