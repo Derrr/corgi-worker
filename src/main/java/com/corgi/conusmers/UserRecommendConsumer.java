@@ -43,7 +43,8 @@ public class UserRecommendConsumer {
     @RabbitHandler
     public void process(Channel channel, Message message, RecommendCalculater calculater) {
         String userId = calculater.getUserId();
-        if (!StringUtils.isEmpty(userId)) {
+        log.info("calculating... " + userId);
+        if (StringUtils.isEmpty(userId)) {
             return;
         }
         corgiUserRecommendService.clearRecUser(userId);
