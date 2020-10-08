@@ -52,6 +52,9 @@ public class UserRecommendConsumer {
         List<String> fanIds = new ArrayList<>();
         do {
             List<UserProfile> userProfiles = corgiUserFollowService.getFollowUserByPage(userId, "new", 0.0, 0.0, page1, size);
+            if (page1 == 1 && userProfiles.size() < 10) {
+                break;
+            }
             page1++;
             if (CollectionUtils.isEmpty(userProfiles)) {
                 break;
@@ -88,6 +91,10 @@ public class UserRecommendConsumer {
                 } while (true);
             }
         } while (true);
+
+        if (fanIds.size() > 0) {
+            corgiUserRecommendService.deleteRecUserByWeight(userId, fanIds.size() / 10);
+        }
     }
 
 }
