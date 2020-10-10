@@ -32,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 @RabbitListener(queues = CorgiQueueName.TRACE_FOLLOW_QUEUE)
-
 public class TraceFollowConsumer {
     private static final long MAX_INTERVAL = 5 * 60 * 1000L;
 
