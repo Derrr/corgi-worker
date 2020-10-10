@@ -79,11 +79,11 @@ public class UserRecommendConsumer {
             }
         } while (true);
 
-        int weight = 1;
-        if (countMatch > 10) {
-            weight = countMatch / 10;
-        }
-        corgiUserRecommendService.deleteRecUserByWeight(userId, weight);
+//        int weight = 1;
+//        if (countMatch > 10) {
+//            weight = countMatch / 10;
+//        }
+//        corgiUserRecommendService.deleteRecUserByWeight(userId, weight);
     }
 
 }
