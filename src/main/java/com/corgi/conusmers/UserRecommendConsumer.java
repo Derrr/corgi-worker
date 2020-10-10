@@ -44,55 +44,44 @@ public class UserRecommendConsumer {
     public void process(Channel channel, Message message, RecommendCalculater calculater) {
         String userId = calculater.getUserId();
         log.info("calculating... " + userId);
-        if (StringUtils.isEmpty(userId)) {
+        if (!StringUtils.isEmpty(userId)) {
             return;
         }
         corgiUserRecommendService.clearRecUser(userId);
+        int countMatch = 0;
         int size = 100;
         int page1 = 1;
-        List<String> fanIds = new ArrayList<>();
         do {
-            List<UserProfile> userProfiles = corgiUserFollowService.getFollowUserByPage(userId, "new", 0.0, 0.0, page1, size);
+            List<UserProfile> userProfiles = corgiUserFollowService.getMatchUserByPage(userId, "new", 0.0, 0.0, page1, size);
             page1++;
             if (CollectionUtils.isEmpty(userProfiles)) {
                 break;
             }
             for (UserProfile userProfile : userProfiles) {
-                String followerId = userProfile.getUserId();
-                corgiUserRecommendService.followRecUser(userId, followerId);
+                if (userProfile == null || userProfile.getUserId() == null) {
+                    continue;
+                }
+                countMatch++;
+                String matchId = userProfile.getUserId();
                 int page2 = 1;
                 do {
-                    List<UserProfile> fanProfiles = corgiUserFollowService.getFollowedUserByPage(followerId, 0L, page2, size);
+                    List<UserProfile> matchProfiles = corgiUserFollowService.getMatchUserByPage(matchId, "new", 0.0, 0.0, page2, size);
                     page2++;
-                    if (CollectionUtils.isEmpty(fanProfiles)) {
+                    if (CollectionUtils.isEmpty(matchProfiles)) {
                         break;
                     }
-                    for (UserProfile fanProfile : fanProfiles) {
-                        String fanId = fanProfile.getUserId();
-                        if (fanIds.contains(fanId)) {
-                            continue;
-                        }
-                        fanIds.add(fanId);
-                        int page3 = 1;
-                        do {
-                            List<UserProfile> resultProfiles = corgiUserFollowService.getFollowUserByPage(fanId, "new", 0.0, 0.0, page3, size);
-                            page3++;
-                            if (CollectionUtils.isEmpty(resultProfiles)) {
-                                break;
-                            }
-                            for (UserProfile resultProfile : resultProfiles) {
-                                String resultId = resultProfile.getUserId();
-                                corgiUserRecommendService.addRecUser(userId, resultId);
-                            }
-                        } while (true);
+                    for (UserProfile matchProfile : matchProfiles) {
+                        String resultId = matchProfile.getUserId();
+                        corgiUserRecommendService.addRecUser(userId, resultId);
+
                     }
                 } while (true);
             }
         } while (true);
 
-        int weight = fanIds.size() / 10;
-        if (weight < 1) {
-            weight = 1;
+        int weight = 1;
+        if (countMatch > 10) {
+            weight = countMatch / 10;
         }
         corgiUserRecommendService.deleteRecUserByWeight(userId, weight);
     }
