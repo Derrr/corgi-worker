@@ -57,13 +57,6 @@ public class PushMessageConsumer {
             } else {
                 extra.put("type", PushMessage.MATCH_MESSAGE_TYPE + "");
                 pushMessage.setMessage(PushMessage.MATCH_MESSAGE);
-//                pushService.sendMessage(pushMessage);
-
-                //调换发送者和接受者
-//                String sourceId = pushMessage.getTargetUserId();
-//                pushMessage.setTargetUserId(pushMessage.getSourceUserId());
-//                pushMessage.setSourceUserId(sourceId);
-//                extra.put("userId", sourceId);
             }
             pushService.sendMessage(pushMessage);
         } else if (PushMessage.MATCH.equals(pushMessage.getType())) {
@@ -108,6 +101,17 @@ public class PushMessageConsumer {
                     UserPosition position = itPosition.next();
                     if (position != null && userId.equals(position.getUserId())) {
                         itPosition.remove();
+                    } else {
+                        int match = corgiUserFollowService.isFollowed(pushMessage.getSourceUserId(), position.getUserId());
+                        if (match < 3) {
+                            itPosition.remove();
+                        } else {
+                            String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + position.getUserId();
+                            Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "1", 7L, TimeUnit.DAYS);
+                            if (!result) {
+                                itPosition.remove();
+                            }
+                        }
                     }
                 }
                 page++;
@@ -121,6 +125,27 @@ public class PushMessageConsumer {
             reply.setTargetUserId(userId);
             reply.setMessage("嘿！你的“一呼百应”触发成功，已经告知了活动地点附近 " + total + " 个小哥哥哦，等待一个小红点吧");
             pushService.sendMessage(reply);
+        } else if (PushMessage.CITY.concat("_user").equals(pushMessage.getType())) {
+            String city = (String) pushMessage.getExtra().get("city");
+            String userId = pushMessage.getSourceUserId();
+            pushMessage.setSourceUserId(PushService.HELPER);
+            int page = 1;
+            int pageSize = 500;
+            while (true) {
+                List<UserPosition> userPositions = corgiUserService.getFollowedCityUser(null, city, page, pageSize);
+                if (CollectionUtils.isEmpty(userPositions)) {
+                    break;
+                }
+                Iterator<UserPosition> itPosition = userPositions.iterator();
+                while (itPosition.hasNext()) {
+                    UserPosition position = itPosition.next();
+                    if (position != null && userId.equals(position.getUserId())) {
+                        itPosition.remove();
+                    }
+                }
+                page++;
+                sendBatchPosition(userPositions, pushMessage);
+            }
         } else {
             pushService.sendMessage(pushMessage);
         }
