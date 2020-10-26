@@ -101,17 +101,6 @@ public class PushMessageConsumer {
                     UserPosition position = itPosition.next();
                     if (position != null && userId.equals(position.getUserId())) {
                         itPosition.remove();
-                    } else {
-                        int match = corgiUserFollowService.isFollowed(pushMessage.getSourceUserId(), position.getUserId());
-                        if (match < 3) {
-                            itPosition.remove();
-                        } else {
-                            String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + position.getUserId();
-                            Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "1", 7L, TimeUnit.DAYS);
-                            if (!result) {
-                                itPosition.remove();
-                            }
-                        }
                     }
                 }
                 page++;
@@ -139,8 +128,20 @@ public class PushMessageConsumer {
                 Iterator<UserPosition> itPosition = userPositions.iterator();
                 while (itPosition.hasNext()) {
                     UserPosition position = itPosition.next();
-                    if (position != null && userId.equals(position.getUserId())) {
+                    if (position != null && ((userId.equals(position.getUserId())
+                            || (!position.getVersion().equals("1.5.8") && !position.getVersion().equals("android1.5.4"))))) {
                         itPosition.remove();
+                    } else {
+                        int match = corgiUserFollowService.isFollowed(pushMessage.getSourceUserId(), position.getUserId());
+                        if (match < 3) {
+                            itPosition.remove();
+                        } else {
+                            String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + position.getUserId();
+                            Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "1", 7L, TimeUnit.DAYS);
+                            if (!result) {
+                                itPosition.remove();
+                            }
+                        }
                     }
                 }
                 page++;
