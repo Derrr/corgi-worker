@@ -147,6 +147,8 @@ public class PushMessageConsumer {
                 page++;
                 sendBatchPosition(userPositions, pushMessage);
             }
+        } else if (PushMessage.ACTIVITY.concat("_end").equals(pushMessage.getType())) {
+            sendSignUp(pushMessage);
         } else {
             pushService.sendMessage(pushMessage);
         }
@@ -180,6 +182,13 @@ public class PushMessageConsumer {
                 break;
             }
         }
+    }
+
+    private void sendSignUp(PushMessage pushMessage) {
+        String activityId = (String) pushMessage.getExtra().get("activityId");
+        List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, null, UserSignUp.AGREE + "");
+        pushMessage.setSourceUserId(PushService.HELPER);
+        sendBatch(userProfiles, pushMessage);
     }
 
     private Integer sendBatchPosition(List<UserPosition> userPositions, PushMessage pushMessage) {
