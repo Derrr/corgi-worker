@@ -137,10 +137,10 @@ public class PushMessageConsumer {
                             itPosition.remove();
                         } else {
                             String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + position.getUserId();
-                            Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "1", 7L, TimeUnit.DAYS);
-                            if (!result) {
-                                itPosition.remove();
-                            }
+                            //Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "1", 7L, TimeUnit.DAYS);
+                            //if (!result) {
+                                //itPosition.remove();
+                            //}
                         }
                     }
                 }
