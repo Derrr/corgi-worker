@@ -115,31 +115,37 @@ public class PushMessageConsumer {
             reply.setMessage("嘿！你的“一呼百应”触发成功，已经告知了活动地点附近 " + total + " 个小哥哥哦，等待一个小红点吧");
             pushService.sendMessage(reply);
         } else if (PushMessage.CITY.concat("_user").equals(pushMessage.getType())) {
+
             String city = (String) pushMessage.getExtra().get("city");
+
             String userId = pushMessage.getSourceUserId();
+            log.info("city_user .... into" + city + userId);
             pushMessage.setSourceUserId(PushService.HELPER);
             int page = 1;
             int pageSize = 500;
             while (true) {
                 List<UserPosition> userPositions = corgiUserService.getFollowedCityUser(null, city, page, pageSize);
+                log.info("city_user .... size:" + userPositions.size());
                 if (CollectionUtils.isEmpty(userPositions)) {
                     break;
                 }
                 Iterator<UserPosition> itPosition = userPositions.iterator();
                 while (itPosition.hasNext()) {
                     UserPosition position = itPosition.next();
+                    log.info("city_user .... userId:" + position.getUserId());
                     if (position != null && ((userId.equals(position.getUserId())
                             || (!position.getVersion().equals("1.5.8") && !position.getVersion().equals("android1.5.4"))))) {
                         itPosition.remove();
                     } else {
                         int match = corgiUserFollowService.isFollowed(pushMessage.getSourceUserId(), position.getUserId());
+                        log.info("city_user .... match:" + match);
                         if (match < 3) {
                             itPosition.remove();
                         } else {
                             String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + position.getUserId();
                             //Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "1", 7L, TimeUnit.DAYS);
                             //if (!result) {
-                                //itPosition.remove();
+                            //itPosition.remove();
                             //}
                         }
                     }
