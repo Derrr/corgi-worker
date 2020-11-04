@@ -133,7 +133,7 @@ public class PushMessageConsumer {
                 while (itPosition.hasNext()) {
                     UserPosition position = itPosition.next();
                     log.info("city_user .... userId:" + position.getUserId());
-                    if (position != null && ((userId.equals(position.getUserId())
+                    if (position != null && ((userId.equals(position.getUserId()) || position.getVersion() == null
                             || (!position.getVersion().equals("1.5.8") && !position.getVersion().equals("android1.5.4"))))) {
                         itPosition.remove();
                     } else {
