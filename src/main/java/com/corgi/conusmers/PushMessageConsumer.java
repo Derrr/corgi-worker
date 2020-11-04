@@ -133,7 +133,6 @@ public class PushMessageConsumer {
                 while (itPosition.hasNext()) {
                     UserPosition position = itPosition.next();
                     log.info("city_user .... userId:" + position.getUserId());
-
                     int match = corgiUserFollowService.isFollowed(userId, position.getUserId());
                     log.info("city_user .... match:" + match);
                     if (match < 3) {
