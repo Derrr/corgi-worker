@@ -137,7 +137,7 @@ public class PushMessageConsumer {
                             || (!position.getVersion().equals("1.5.8") && !position.getVersion().equals("android1.5.4"))))) {
                         itPosition.remove();
                     } else {
-                        int match = corgiUserFollowService.isFollowed(pushMessage.getSourceUserId(), position.getUserId());
+                        int match = corgiUserFollowService.isFollowed(userId, position.getUserId());
                         log.info("city_user .... match:" + match);
                         if (match < 3) {
                             itPosition.remove();
