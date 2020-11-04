@@ -133,21 +133,17 @@ public class PushMessageConsumer {
                 while (itPosition.hasNext()) {
                     UserPosition position = itPosition.next();
                     log.info("city_user .... userId:" + position.getUserId());
-                    if (position != null && ((userId.equals(position.getUserId()) || position.getVersion() == null
-                            || (!position.getVersion().equals("1.5.8") && !position.getVersion().equals("android1.5.4"))))) {
+
+                    int match = corgiUserFollowService.isFollowed(userId, position.getUserId());
+                    log.info("city_user .... match:" + match);
+                    if (match < 3) {
                         itPosition.remove();
                     } else {
-                        int match = corgiUserFollowService.isFollowed(userId, position.getUserId());
-                        log.info("city_user .... match:" + match);
-                        if (match < 3) {
-                            itPosition.remove();
-                        } else {
-                            String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + position.getUserId();
-                            //Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "1", 7L, TimeUnit.DAYS);
-                            //if (!result) {
-                            //itPosition.remove();
-                            //}
-                        }
+                        String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + position.getUserId();
+                        //Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "1", 7L, TimeUnit.DAYS);
+                        //if (!result) {
+                        //itPosition.remove();
+                        //}
                     }
                 }
                 page++;
