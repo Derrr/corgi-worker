@@ -41,6 +41,8 @@ public class PushMessageConsumer {
     private CorgiUserMatchService corgiUserMatchService;
     @Reference
     private CorgiPushLogService corgiPushLogService;
+    @Reference
+    private CorgiBlacklistService corgiBlacklistService;
     @Autowired
     private StringRedisTemplate redisTemplate;
 
@@ -88,6 +90,7 @@ public class PushMessageConsumer {
             String city = (String) pushMessage.getExtra().get("city");
             String userId = pushMessage.getSourceUserId();
             pushMessage.setSourceUserId(PushService.HELPER);
+            List<String> beBlackList = corgiBlacklistService.getBeBlacked(userId);
             int page = 1;
             int pageSize = 500;
             int total = 0;
@@ -99,7 +102,7 @@ public class PushMessageConsumer {
                 Iterator<UserPosition> itPosition = userPositions.iterator();
                 while (itPosition.hasNext()) {
                     UserPosition position = itPosition.next();
-                    if (position != null && userId.equals(position.getUserId())) {
+                    if (position != null && (userId.equals(position.getUserId()) || beBlackList.contains(position.getUserId()))) {
                         itPosition.remove();
                     }
                 }
