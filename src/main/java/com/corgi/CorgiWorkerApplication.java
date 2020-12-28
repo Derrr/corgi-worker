@@ -45,9 +45,4 @@ public class CorgiWorkerApplication {
     }
 
 
-//    @Bean
-//    public JPushClient getJPushClient(){
-//        JPushClient jpushClient = new JPushClient(MASTER_SECRET, APP_KEY, null, ClientConfig.getInstance());
-//        return jpushClient;
-//    }
 }
