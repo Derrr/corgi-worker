@@ -19,8 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,33 +50,86 @@ public class UserRecommendConsumer {
         int countMatch = 0;
         int size = 100;
         int page1 = 1;
-        do {
-            List<UserProfile> userProfiles = corgiUserFollowService.getMatchUserByPage(userId, "new", 0.0, 0.0, page1, size);
-            page1++;
-            if (CollectionUtils.isEmpty(userProfiles)) {
-                break;
-            }
-            for (UserProfile userProfile : userProfiles) {
-                if (userProfile == null || userProfile.getUserId() == null) {
-                    continue;
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -30);
+        long time = calendar.getTimeInMillis();
+        List<String> followUserIds = corgiUserFollowService.getFollowUser(userId);
+        List<String> fanList = new ArrayList<>();
+        HashMap<String, Integer> weightMap = new HashMap<>();
+        List<UserProfile> followUsers = corgiUserFollowService.getFollowUserByPage(userId, "new", 0.0, 0.0, 1, 100);
+        for (UserProfile followUser : followUsers) {
+            int page = 1;
+            do {
+                boolean shouldBreak = false;
+                List<UserProfile> fans = corgiUserFollowService.getFollowedUserByPage(followUser.getUserId(), 0l, page, size);
+                if (CollectionUtils.isEmpty(fans)) {
+                    break;
                 }
-                countMatch++;
-                String matchId = userProfile.getUserId();
-                int page2 = 1;
-                do {
-                    List<UserProfile> matchProfiles = corgiUserFollowService.getMatchUserByPage(matchId, "new", 0.0, 0.0, page2, size);
-                    page2++;
-                    if (CollectionUtils.isEmpty(matchProfiles)) {
+                for (UserProfile fan : fans) {
+                    if (fan.getTime() < time) {
+                        shouldBreak = true;
                         break;
                     }
-                    for (UserProfile matchProfile : matchProfiles) {
-                        String resultId = matchProfile.getUserId();
-                        corgiUserRecommendService.addRecUser(userId, resultId);
+                    addWeight(fan.getUserId(), weightMap, fanList);
+                }
+                page++;
+                if (shouldBreak) {
+                    break;
+                }
+            } while (true);
+        }
 
+        for (String fanId : fanList) {
+            int page = 1;
+            do {
+                boolean shouldBreak = false;
+                List<UserProfile> targets = corgiUserFollowService.getFollowUserByPage(fanId, "active", 0.0, 0.0, page, 100);
+                if (CollectionUtils.isEmpty(targets)) {
+                    break;
+                }
+                for (UserProfile target : targets) {
+                    if (target.getTime() < time) {
+                        shouldBreak = true;
+                        break;
                     }
-                } while (true);
-            }
-        } while (true);
+                    if (followUserIds.contains(target.getUserId())) {
+                        continue;
+                    }
+                    corgiUserRecommendService.addRecUser(userId, target.getUserId(), weightMap.get(fanId));
+                }
+                page++;
+                if (shouldBreak) {
+                    break;
+                }
+            } while (true);
+        }
+//        do {
+//            List<UserProfile> userProfiles = corgiUserFollowService.getMatchUserByPage(userId, "new", 0.0, 0.0, page1, size);
+//            page1++;
+//            if (CollectionUtils.isEmpty(userProfiles)) {
+//                break;
+//            }
+//            for (UserProfile userProfile : userProfiles) {
+//                if (userProfile == null || userProfile.getUserId() == null) {
+//                    continue;
+//                }
+//                countMatch++;
+//                String matchId = userProfile.getUserId();
+//                int page2 = 1;
+//                do {
+//                    List<UserProfile> matchProfiles = corgiUserFollowService.getMatchUserByPage(matchId, "new", 0.0, 0.0, page2, size);
+//                    page2++;
+//                    if (CollectionUtils.isEmpty(matchProfiles)) {
+//                        break;
+//                    }
+//                    for (UserProfile matchProfile : matchProfiles) {
+//                        String resultId = matchProfile.getUserId();
+//                        corgiUserRecommendService.addRecUser(userId, resultId);
+//
+//                    }
+//                } while (true);
+//            }
+//        } while (true);
 
 //        int weight = 1;
 //        if (countMatch > 10) {
@@ -86,4 +138,14 @@ public class UserRecommendConsumer {
 //        corgiUserRecommendService.deleteRecUserByWeight(userId, weight);
     }
 
+    private void addWeight(String userId, HashMap<String, Integer> weightMap, List<String> fanList) {
+        Integer weight = weightMap.get(userId);
+        if (weight == null) {
+            weight = 1;
+            fanList.add(userId);
+        } else {
+            weight++;
+        }
+        weightMap.put(userId, weight);
+    }
 }
