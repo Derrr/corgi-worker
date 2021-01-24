@@ -44,6 +44,10 @@ public class UserMatchRefreshConsumer {
         if (StringUtils.isEmpty(userId)) {
             return;
         }
+        //废弃这个队列
+        if (!StringUtils.isEmpty(userId)) {
+            return;
+        }
         int size = 1000;
         int start = 0;
         List<UserMatch> userMatchList;

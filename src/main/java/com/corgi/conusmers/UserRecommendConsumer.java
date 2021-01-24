@@ -47,9 +47,7 @@ public class UserRecommendConsumer {
             return;
         }
         corgiUserRecommendService.clearRecUser(userId);
-        int countMatch = 0;
         int size = 100;
-        int page1 = 1;
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -30);
         long time = calendar.getTimeInMillis();
@@ -58,6 +56,10 @@ public class UserRecommendConsumer {
         HashMap<String, Integer> weightMap = new HashMap<>();
         List<UserProfile> followUsers = corgiUserFollowService.getFollowUserByPage(userId, "new", 0.0, 0.0, 1, 100);
         for (UserProfile followUser : followUsers) {
+            if (followUser == null) {
+                continue;
+            }
+            log.info("calculating... follower:" + followUser.getUserId());
             int page = 1;
             do {
                 boolean shouldBreak = false;
@@ -66,10 +68,14 @@ public class UserRecommendConsumer {
                     break;
                 }
                 for (UserProfile fan : fans) {
+                    if (fan == null || fan.getTime() == null) {
+                        continue;
+                    }
                     if (fan.getTime() < time) {
                         shouldBreak = true;
                         break;
                     }
+                    log.info("calculating... fan:" + fan.getUserId());
                     addWeight(fan.getUserId(), weightMap, fanList);
                 }
                 page++;
@@ -88,6 +94,9 @@ public class UserRecommendConsumer {
                     break;
                 }
                 for (UserProfile target : targets) {
+                    if (target == null || target.getTime() == null) {
+                        continue;
+                    }
                     if (target.getTime() < time) {
                         shouldBreak = true;
                         break;
@@ -95,6 +104,7 @@ public class UserRecommendConsumer {
                     if (followUserIds.contains(target.getUserId())) {
                         continue;
                     }
+                    log.info("calculating... target:" + target.getUserId());
                     corgiUserRecommendService.addRecUser(userId, target.getUserId(), weightMap.get(fanId));
                 }
                 page++;

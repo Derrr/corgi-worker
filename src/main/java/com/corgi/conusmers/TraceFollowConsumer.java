@@ -46,6 +46,10 @@ public class TraceFollowConsumer {
             log.error("trace userId 为空");
             return;
         }
+        //废弃这个队列
+        if (!StringUtils.isEmpty(traceFollow.getUserId())) {
+            return;
+        }
 
         if (TraceFollow.CHANGE.equals(traceFollow.getOption())) {
             changeUserTrace(traceFollow);
