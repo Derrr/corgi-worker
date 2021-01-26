@@ -52,6 +52,7 @@ public class UserRecommendConsumer {
         calendar.add(Calendar.DATE, -30);
         long time = calendar.getTimeInMillis();
         List<String> followUserIds = corgiUserFollowService.getFollowUser(userId);
+        followUserIds.add(userId);
         List<String> fanList = new ArrayList<>();
         HashMap<String, Integer> weightMap = new HashMap<>();
         List<UserProfile> followUsers = corgiUserFollowService.getFollowUserByPage(userId, "new", 0.0, 0.0, 1, 100);
@@ -69,6 +70,9 @@ public class UserRecommendConsumer {
                 }
                 for (UserProfile fan : fans) {
                     if (fan == null || fan.getTime() == null) {
+                        continue;
+                    }
+                    if (userId.equals(fan.getUserId())) {
                         continue;
                     }
                     if (fan.getTime() < time) {

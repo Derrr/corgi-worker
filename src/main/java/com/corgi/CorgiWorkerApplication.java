@@ -49,4 +49,13 @@ public class CorgiWorkerApplication {
         return new Queue(CorgiQueueName.FEED_REFRESH);
     }
 
+    @Bean
+    public Queue addInfluencerQueue() {
+        return new Queue(CorgiQueueName.INFLUENCER_ADD);
+    }
+
+    @Bean
+    public Queue onboardQueue() {
+        return new Queue(CorgiQueueName.ONBOARD_QUEUE);
+    }
 }
