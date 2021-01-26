@@ -69,4 +69,8 @@ public class CorgiWorkerApplication {
         return new Queue(CorgiQueueName.REGISTER_QUEUE);
     }
 
+    @Bean
+    public Queue barActivityQueue() {
+        return new Queue(CorgiQueueName.BAR_ACTIVITY_QUEUE);
+    }
 }
