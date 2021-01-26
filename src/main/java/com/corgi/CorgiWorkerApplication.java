@@ -51,11 +51,22 @@ public class CorgiWorkerApplication {
 
     @Bean
     public Queue addInfluencerQueue() {
-        return new Queue(CorgiQueueName.INFLUENCER_ADD);
+        return new Queue(CorgiQueueName.INFLUENCER_JOIN_QUEUE);
     }
 
     @Bean
     public Queue onboardQueue() {
         return new Queue(CorgiQueueName.ONBOARD_QUEUE);
     }
+
+    @Bean
+    public Queue leftInfluencerQueue() {
+        return new Queue(CorgiQueueName.INFLUENCER_LEFT_QUEUE);
+    }
+
+    @Bean
+    public Queue registerQueue() {
+        return new Queue(CorgiQueueName.REGISTER_QUEUE);
+    }
+
 }
