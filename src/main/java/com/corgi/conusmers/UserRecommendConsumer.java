@@ -47,7 +47,7 @@ public class UserRecommendConsumer {
             return;
         }
         corgiUserRecommendService.clearRecUser(userId);
-        int size = 100;
+        int size = 1000;
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -30);
         long time = calendar.getTimeInMillis();
@@ -63,7 +63,6 @@ public class UserRecommendConsumer {
             log.info("calculating... follower:" + followUser.getUserId());
             int page = 1;
             do {
-                boolean shouldBreak = false;
                 List<UserProfile> fans = corgiUserFollowService.getFollowedUserByPage(followUser.getUserId(), 0l, page, size);
                 if (CollectionUtils.isEmpty(fans)) {
                     break;
@@ -76,16 +75,12 @@ public class UserRecommendConsumer {
                         continue;
                     }
                     if (fan.getTime() < time) {
-                        shouldBreak = true;
-                        break;
+                        continue;
                     }
                     log.info("calculating... fan:" + fan.getUserId());
                     addWeight(fan.getUserId(), weightMap, fanList);
                 }
                 page++;
-                if (shouldBreak) {
-                    break;
-                }
             } while (true);
         }
 
