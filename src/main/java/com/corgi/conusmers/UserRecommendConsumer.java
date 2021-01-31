@@ -55,12 +55,12 @@ public class UserRecommendConsumer {
         followUserIds.add(userId);
         List<String> fanList = new ArrayList<>();
         HashMap<String, Integer> weightMap = new HashMap<>();
+        HashMap<String, Integer> recMap = new HashMap<>();
         List<UserProfile> followUsers = corgiUserFollowService.getFollowUserByPage(userId, "new", 0.0, 0.0, 1, 100);
         for (UserProfile followUser : followUsers) {
             if (followUser == null) {
                 continue;
             }
-            log.info("calculating... follower:" + followUser.getUserId());
             int page = 1;
             do {
                 List<UserProfile> fans = corgiUserFollowService.getFollowedUserByPage(followUser.getUserId(), 0l, page, size);
@@ -77,7 +77,6 @@ public class UserRecommendConsumer {
                     if (fan.getTime() < time) {
                         continue;
                     }
-                    log.info("calculating... fan:" + fan.getUserId());
                     addWeight(fan.getUserId(), weightMap, fanList);
                 }
                 page++;
@@ -103,14 +102,23 @@ public class UserRecommendConsumer {
                     if (followUserIds.contains(target.getUserId())) {
                         continue;
                     }
-                    log.info("calculating... target:" + target.getUserId());
-                    corgiUserRecommendService.addRecUser(userId, target.getUserId(), weightMap.get(fanId));
+                    addRec(target.getUserId(), weightMap.get(fanId), recMap);
+
                 }
                 page++;
                 if (shouldBreak) {
                     break;
                 }
             } while (true);
+        }
+        List<Map.Entry<String, Integer>> recList = new ArrayList<>(recMap.entrySet());
+        if (recList.size() > 100) {
+            Collections.sort(recList, (Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) -> o2.getValue().compareTo(o1.getValue()));
+        }
+        for (int i = 0; i < 100; i++) {
+            String recId = recList.get(i).getKey();
+            Integer weight = recList.get(i).getValue();
+            corgiUserRecommendService.addRecUser(userId, recId, weight);
         }
 //        do {
 //            List<UserProfile> userProfiles = corgiUserFollowService.getMatchUserByPage(userId, "new", 0.0, 0.0, page1, size);
@@ -145,6 +153,16 @@ public class UserRecommendConsumer {
 //            weight = countMatch / 10;
 //        }
 //        corgiUserRecommendService.deleteRecUserByWeight(userId, weight);
+    }
+
+    private void addRec(String recId, Integer weight, HashMap<String, Integer> recMap) {
+        Integer tmpWeight = recMap.get(recId);
+        if (tmpWeight == null) {
+            tmpWeight = weight;
+        } else {
+            tmpWeight += weight;
+        }
+        recMap.put(recId, tmpWeight);
     }
 
     private void addWeight(String userId, HashMap<String, Integer> weightMap, List<String> fanList) {

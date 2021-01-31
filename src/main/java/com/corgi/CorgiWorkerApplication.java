@@ -45,6 +45,10 @@ public class CorgiWorkerApplication {
     }
 
     @Bean
+    public Queue activityRecommendQueue() {
+        return new Queue(CorgiQueueName.ACTIVITY_RECOMMEND_QUEUE);
+    }
+    @Bean
     public Queue feedRefreshQueue() {
         return new Queue(CorgiQueueName.FEED_REFRESH);
     }
