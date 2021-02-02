@@ -51,7 +51,7 @@ public class ActivityRecommendConsumer {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -30);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String monthAgo = sdf.format(calculater.getTime());
+        String monthAgo = sdf.format(calendar.getTime());
         corgiUserRecommendService.clearRecActivity(userId);
         List<String> likeIds = corgiLikeService.getLikedActivity(userId, 1, 500);
         int size = 1000;
