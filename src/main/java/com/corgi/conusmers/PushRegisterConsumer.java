@@ -47,6 +47,9 @@ public class PushRegisterConsumer {
         pushService.sendMessage(pushMessage);
 
         UserDetail detail = corgiUserService.getUserDetail(userId, null);
+        if (detail == null) {
+            log.error("注册查无此人:{} ", userId);
+        }
         Double lat = detail.getLat();
         Double lng = detail.getLng();
         if (lat > 200) {
