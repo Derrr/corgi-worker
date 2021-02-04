@@ -122,22 +122,18 @@ public class PushMessageConsumer {
             String city = (String) pushMessage.getExtra().get("city");
 
             String userId = pushMessage.getSourceUserId();
-            log.info("city_user .... into" + city + userId);
             pushMessage.setSourceUserId(PushService.HELPER);
             int page = 1;
             int pageSize = 500;
             while (true) {
                 List<UserPosition> userPositions = corgiUserService.getFollowedCityUser(null, city, page, pageSize);
-                log.info("city_user .... size:" + userPositions.size());
                 if (CollectionUtils.isEmpty(userPositions)) {
                     break;
                 }
                 Iterator<UserPosition> itPosition = userPositions.iterator();
                 while (itPosition.hasNext()) {
                     UserPosition position = itPosition.next();
-                    log.info("city_user .... userId:" + position.getUserId());
                     int match = corgiUserFollowService.isFollowed(userId, position.getUserId());
-                    log.info("city_user .... match:" + match);
                     if (match < 3) {
                         itPosition.remove();
                     } else {
