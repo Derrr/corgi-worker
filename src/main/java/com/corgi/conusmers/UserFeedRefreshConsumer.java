@@ -35,7 +35,7 @@ public class UserFeedRefreshConsumer {
     private CorgiFeedService corgiFeedService;
     @Reference
     private CorgiVlogService corgiVlogService;
-    @Reference
+    @Reference(retries = 1, timeout = 100000)
     private CorgiUserRecommendService corgiUserRecommendService;
 
     @RabbitHandler
@@ -49,12 +49,20 @@ public class UserFeedRefreshConsumer {
         merge(result, recallNewVlog(userId, ctime));
         merge(result, recallRecommendUser(userId, ctime));
         merge(result, recallRecommendVlog(userId, ctime));
+        merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.MANUAL, 2));
+        merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 12 - result.size()));
+
         for (CorgiVlog vlog : result) {
             corgiFeedService.addFeed(buildFeed(vlog, userId));
         }
-        if (corgiFeedService.countUnviewFeed(userId) < 5) {
+    }
 
-        }
+    private List<CorgiVlog> recallHotVlog(String userId, String ctime, String type, Integer size) {
+        CorgiVlog recall = new CorgiVlog();
+        recall.setCtime(ctime);
+        recall.setUserId(userId);
+        recall.setType(type);
+        return corgiVlogService.recallHotVlog(recall, size);
     }
 
     private CorgiFeed buildFeed(CorgiVlog vlog, String userId) {
@@ -70,7 +78,7 @@ public class UserFeedRefreshConsumer {
         recall.setCtime(ctime);
         recall.setUserId(userId);
         recall.setType("like");
-        return corgiVlogService.recallVlog(recall, 5);
+        return corgiVlogService.recallVlog(recall, 3);
     }
 
     private List<CorgiVlog> recallRecommendUser(String userId, String ctime) {
@@ -81,7 +89,7 @@ public class UserFeedRefreshConsumer {
         recall.setUserId(userId);
         for (UserProfile userProfile : userProfiles) {
             vlogs.addAll(corgiVlogService.recallTargetVlog(userProfile.getUserId(), recall, 1));
-            if (vlogs.size() >= 5) {
+            if (vlogs.size() >= 3) {
                 return vlogs;
             }
         }
@@ -92,7 +100,7 @@ public class UserFeedRefreshConsumer {
         CorgiVlog recall = new CorgiVlog();
         recall.setCtime(ctime);
         recall.setUserId(userId);
-        return corgiVlogService.recallVlog(recall, 2);
+        return corgiVlogService.recallVlog(recall, 1);
     }
 
     private List<CorgiVlog> merge(List<CorgiVlog> result, List<CorgiVlog> newVlog) {
@@ -101,6 +109,16 @@ public class UserFeedRefreshConsumer {
         }
         Random random = new Random();
         for (CorgiVlog vlog : newVlog) {
+            boolean shouldContinue = false;
+            for (CorgiVlog olog : result) {
+                if (olog.getActivityId().equals(vlog.getActivityId())) {
+                    shouldContinue = true;
+                    break;
+                }
+            }
+            if (shouldContinue) {
+                continue;
+            }
             int index = random.nextInt(result.size() + 1);
             result.add(index, vlog);
         }
