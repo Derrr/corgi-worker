@@ -18,10 +18,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -82,15 +79,27 @@ public class UserFeedRefreshConsumer {
     }
 
     private List<CorgiVlog> recallRecommendUser(String userId, String ctime) {
-        List<UserProfile> userProfiles = corgiUserRecommendService.getRecUser(userId, 100);
+        List<UserProfile> userProfiles = corgiUserRecommendService.getVlogRecUser(userId, 100);
         List<CorgiVlog> vlogs = new ArrayList<>();
         CorgiVlog recall = new CorgiVlog();
         recall.setCtime(ctime);
         recall.setUserId(userId);
-        for (UserProfile userProfile : userProfiles) {
-            vlogs.addAll(corgiVlogService.recallTargetVlog(userProfile.getUserId(), recall, 1));
-            if (vlogs.size() >= 3) {
-                return vlogs;
+        Random random = new Random();
+        for (int i = 0; i < userProfiles.size(); i++) {
+            int index = random.nextInt(userProfiles.size());
+            UserProfile userProfile = userProfiles.get(index);
+            if (userProfile == null || StringUtils.isEmpty(userProfile.getUserId())) {
+                userProfiles.remove(index);
+                continue;
+            }
+            List<CorgiVlog> vlogList = corgiVlogService.recallTargetVlog(userProfile.getUserId(), recall, 1);
+            if (CollectionUtils.isEmpty(vlogList)) {
+                userProfiles.remove(index);
+                continue;
+            }
+            vlogs.addAll(vlogList);
+            if(vlogs.size() >= 3){
+                break;
             }
         }
         return vlogs;
@@ -100,7 +109,7 @@ public class UserFeedRefreshConsumer {
         CorgiVlog recall = new CorgiVlog();
         recall.setCtime(ctime);
         recall.setUserId(userId);
-        return corgiVlogService.recallVlog(recall, 1);
+        return corgiVlogService.recallVlog(recall, 2);
     }
 
     private List<CorgiVlog> merge(List<CorgiVlog> result, List<CorgiVlog> newVlog) {
