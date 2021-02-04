@@ -110,6 +110,9 @@ public class UserFeedRefreshConsumer {
         Random random = new Random();
         for (CorgiVlog vlog : newVlog) {
             boolean shouldContinue = false;
+            if (vlog == null || StringUtils.isEmpty(vlog.getActivityId())) {
+                continue;
+            }
             for (CorgiVlog olog : result) {
                 if (olog.getActivityId().equals(vlog.getActivityId())) {
                     shouldContinue = true;
