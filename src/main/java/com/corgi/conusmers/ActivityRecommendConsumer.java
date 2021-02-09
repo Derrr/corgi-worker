@@ -36,6 +36,8 @@ public class ActivityRecommendConsumer {
     private CorgiLikeService corgiLikeService;
     @Reference
     private CorgiUserRecommendService corgiUserRecommendService;
+    @Reference
+    private CorgiUserFollowService corgiUserFollowService;
     @Autowired
     private StringRedisTemplate redisTemplate;
 
@@ -47,7 +49,7 @@ public class ActivityRecommendConsumer {
         if (StringUtils.isEmpty(userId)) {
             return;
         }
-        HashMap<String, Integer> weightMap = new HashMap<>();
+        HashMap<String, Double> weightMap = new HashMap<>();
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -30);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -80,21 +82,28 @@ public class ActivityRecommendConsumer {
                 page++;
             } while (true);
         }
-        List<Map.Entry<String, Integer>> recList = new ArrayList<>(weightMap.entrySet());
+        List<Map.Entry<String, Double>> recList = new ArrayList<>(weightMap.entrySet());
+        for (Map.Entry<String, Double> entry : recList) {
+            String fanId = entry.getKey();
+            Integer followCount = corgiUserFollowService.countFollow(fanId);
+            if (followCount > 0) {
+                entry.setValue(entry.getValue() / Math.sqrt(followCount.doubleValue()));
+            }
+        }
         if (recList.size() > 100) {
-            Collections.sort(recList, (Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) -> o2.getValue().compareTo(o1.getValue()));
+            Collections.sort(recList, (Map.Entry<String, Double> o1, Map.Entry<String, Double> o2) -> o2.getValue().compareTo(o1.getValue()));
         }
         for (int i = 0; i < 100; i++) {
             String recId = recList.get(i).getKey();
-            Integer weight = recList.get(i).getValue();
+            Double weight = recList.get(i).getValue();
             corgiUserRecommendService.addRecActivity(userId, recId, weight);
         }
     }
 
-    private void addWeight(String userId, HashMap<String, Integer> weightMap) {
-        Integer weight = weightMap.get(userId);
+    private void addWeight(String userId, HashMap<String, Double> weightMap) {
+        Double weight = weightMap.get(userId);
         if (weight == null) {
-            weight = 1;
+            weight = 1.0;
         } else {
             weight++;
         }
