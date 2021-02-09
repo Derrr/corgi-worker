@@ -90,10 +90,12 @@ public class ActivityRecommendConsumer {
                 entry.setValue(entry.getValue() / Math.sqrt(followCount.doubleValue()));
             }
         }
+        int max = recList.size();
         if (recList.size() > 100) {
             Collections.sort(recList, (Map.Entry<String, Double> o1, Map.Entry<String, Double> o2) -> o2.getValue().compareTo(o1.getValue()));
+            max = 100;
         }
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < max; i++) {
             String recId = recList.get(i).getKey();
             Double weight = recList.get(i).getValue();
             corgiUserRecommendService.addRecActivity(userId, recId, weight);
