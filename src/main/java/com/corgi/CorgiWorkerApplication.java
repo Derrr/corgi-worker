@@ -48,6 +48,7 @@ public class CorgiWorkerApplication {
     public Queue activityRecommendQueue() {
         return new Queue(CorgiQueueName.ACTIVITY_RECOMMEND_QUEUE);
     }
+
     @Bean
     public Queue feedRefreshQueue() {
         return new Queue(CorgiQueueName.FEED_REFRESH);
@@ -76,5 +77,10 @@ public class CorgiWorkerApplication {
     @Bean
     public Queue barActivityQueue() {
         return new Queue(CorgiQueueName.BAR_ACTIVITY_QUEUE);
+    }
+
+    @Bean
+    public Queue userDateQueue() {
+        return new Queue(CorgiQueueName.USER_DATE_QUEUE);
     }
 }

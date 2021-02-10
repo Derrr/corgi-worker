@@ -32,6 +32,8 @@ public class UserFeedRefreshConsumer {
     private CorgiFeedService corgiFeedService;
     @Reference
     private CorgiVlogService corgiVlogService;
+    @Reference
+    private CorgiBlacklistService corgiBlacklistService;
     @Reference(retries = 1, timeout = 100000)
     private CorgiUserRecommendService corgiUserRecommendService;
 
@@ -40,18 +42,25 @@ public class UserFeedRefreshConsumer {
         if (corgiFeedService.countUnviewFeed(userId) >= 20) {
             return;
         }
+        List<String> blackUserIds = new ArrayList<>();
+        List<UserBasic> basicList = corgiBlacklistService.getBlackUser(userId);
+        if (!CollectionUtils.isEmpty(basicList)) {
+            for (UserBasic basic : basicList) {
+                blackUserIds.add(basic.getUserId());
+            }
+        }
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String ctime = sdf.format(new Date());
         List<CorgiVlog> result = new ArrayList<>();
-        result = merge(result, recallNewVlog(userId, ctime));
-        result = merge(result, recallRecommendUser(userId, ctime));
-        result = merge(result, recallRecommendVlog(userId, ctime));
-        result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.MANUAL, 2, "asc"));
+        result = merge(result, recallNewVlog(userId, ctime), blackUserIds);
+        result = merge(result, recallRecommendUser(userId, ctime), blackUserIds);
+        result = merge(result, recallRecommendVlog(userId, ctime, 8 - result.size()), blackUserIds);
+        result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.MANUAL, 2, "asc"), blackUserIds);
         if (result.size() < 10) {
-            result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 2, "asc"));
-            result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 12 - result.size(), "desc"));
+            result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 2, "asc"), blackUserIds);
+            result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 12 - result.size(), "desc"), blackUserIds);
         } else {
-            result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 12 - result.size(), "asc"));
+            result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 12 - result.size(), "asc"), blackUserIds);
         }
         for (CorgiVlog vlog : result) {
             corgiFeedService.addFeed(buildFeed(vlog, userId));
@@ -75,12 +84,12 @@ public class UserFeedRefreshConsumer {
         return feed;
     }
 
-    private List<CorgiVlog> recallRecommendVlog(String userId, String ctime) {
+    private List<CorgiVlog> recallRecommendVlog(String userId, String ctime, int size) {
         CorgiVlog recall = new CorgiVlog();
         recall.setCtime(ctime);
         recall.setUserId(userId);
         recall.setType("like");
-        return corgiVlogService.recallVlog(recall, 3);
+        return corgiVlogService.recallVlog(recall, size);
     }
 
     private List<CorgiVlog> recallRecommendUser(String userId, String ctime) {
@@ -117,7 +126,7 @@ public class UserFeedRefreshConsumer {
         return corgiVlogService.recallVlog(recall, 2);
     }
 
-    private List<CorgiVlog> merge(List<CorgiVlog> result, List<CorgiVlog> newVlog) {
+    private List<CorgiVlog> merge(List<CorgiVlog> result, List<CorgiVlog> newVlog, List<String> blackUserIds) {
         if (CollectionUtils.isEmpty(newVlog)) {
             return result;
         }
@@ -125,6 +134,9 @@ public class UserFeedRefreshConsumer {
         for (CorgiVlog vlog : newVlog) {
             boolean shouldContinue = false;
             if (vlog == null || StringUtils.isEmpty(vlog.getActivityId())) {
+                continue;
+            }
+            if (blackUserIds.contains(vlog.getUserId())) {
                 continue;
             }
             for (CorgiVlog olog : result) {
