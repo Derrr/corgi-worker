@@ -54,7 +54,6 @@ public class ActivityRecommendConsumer {
         calendar.add(Calendar.DATE, -30);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String monthAgo = sdf.format(calendar.getTime());
-        corgiUserRecommendService.clearRecActivity(userId);
         List<String> likeIds = corgiLikeService.getLikedActivity(userId, 1, 500);
         int size = 1000;
         for (String activityId : likeIds) {
@@ -95,6 +94,7 @@ public class ActivityRecommendConsumer {
             Collections.sort(recList, (Map.Entry<String, Double> o1, Map.Entry<String, Double> o2) -> o2.getValue().compareTo(o1.getValue()));
             max = 100;
         }
+        corgiUserRecommendService.clearRecActivity(userId);
         for (int i = 0; i < max; i++) {
             String recId = recList.get(i).getKey();
             Double weight = recList.get(i).getValue();

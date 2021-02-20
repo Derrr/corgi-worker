@@ -46,7 +46,7 @@ public class UserRecommendConsumer {
         if (StringUtils.isEmpty(userId)) {
             return;
         }
-        corgiUserRecommendService.clearRecUser(userId);
+
         int size = 1000;
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -30);
@@ -125,6 +125,7 @@ public class UserRecommendConsumer {
             Collections.sort(recList, (Map.Entry<String, Double> o1, Map.Entry<String, Double> o2) -> o2.getValue().compareTo(o1.getValue()));
             max = 100;
         }
+        corgiUserRecommendService.clearRecUser(userId);
         for (int i = 0; i < max; i++) {
             String recId = recList.get(i).getKey();
             Double weight = recList.get(i).getValue();
