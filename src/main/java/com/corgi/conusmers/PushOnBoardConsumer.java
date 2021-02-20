@@ -31,16 +31,19 @@ public class PushOnBoardConsumer {
     private PushService pushService;
     @Reference
     private CorgiUserFollowService corgiUserFollowService;
+    @Reference
+    private CorgiUserService corgiUserService;
 
     @RabbitHandler
     public void process(PushMessage pushMessage) {
         String userId = pushMessage.getTargetUserId();
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
         pushMessage.setSourceUserId(PushService.HELPER);
         pushMessage.setMessage("撒花撒花～宝贝你今天被可小基推荐上榜单啦，快发个动态迎接粉丝小哥哥们的崇拜吧。");
         pushService.sendMessage(pushMessage);
 
         List<String> matchUserIds = new ArrayList<>();
-        pushMessage.setMessage("您关注的天菜里，今日又有美人被推荐上Corgi榜单啦，快给他点个赞沾沾喜气，顺便问问他是如何做到上榜的。");
+        pushMessage.setMessage("您关注的天菜 " + userDetail.getNickname() + " 被推荐上Corgi榜单啦，快给他点个赞沾沾喜气，顺便问问他是如何做到上榜的。");
         int page = 1;
         while (true) {
             List<UserProfile> fans = corgiUserFollowService.getFollowedUserByPage(userId, 0l, page, 500);
@@ -59,7 +62,7 @@ public class PushOnBoardConsumer {
             page++;
         }
 
-        pushMessage.setMessage("您的好友里，今日又有美人被推荐上Corgi榜单啦，快给他点个赞沾沾喜气，顺便问问他是如何做到上榜的。");
+        pushMessage.setMessage("您的好友 " + userDetail.getNickname() + " 被推荐上Corgi榜单啦，快给他点个赞沾沾喜气，顺便问问他是如何做到上榜的。");
         pushService.sendMessage(pushMessage, matchUserIds);
     }
 
