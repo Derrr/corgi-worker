@@ -1,12 +1,8 @@
 package com.corgi;
 
-import com.sun.tools.javac.util.List;
-import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
 
