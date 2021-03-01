@@ -39,6 +39,7 @@ public class UserFeedRefreshConsumer {
 
     @RabbitHandler
     public void process(String userId) {
+        log.info("start feeding...{} ", userId);
         if (corgiFeedService.countUnviewFeed(userId) >= 20) {
             return;
         }
