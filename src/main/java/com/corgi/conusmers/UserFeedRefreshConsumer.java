@@ -55,7 +55,10 @@ public class UserFeedRefreshConsumer {
         List<CorgiVlog> result = new ArrayList<>();
         result = merge(result, recallNewVlog(userId, ctime), blackUserIds);
         result = merge(result, recallRecommendUser(userId, ctime), blackUserIds);
-        result = merge(result, recallRecommendVlog(userId, ctime, 8 - result.size()), blackUserIds);
+        result = merge(result, recallRecommendVlog(userId, ctime, 8 - result.size(), "like"), blackUserIds);
+        if (result.size() < 8) {
+            result = merge(result, recallRecommendVlog(userId, ctime, 8 - result.size(), "follow"), blackUserIds);
+        }
         result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.MANUAL, 2, "asc"), blackUserIds);
         if (result.size() < 10) {
             result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 2, "asc"), blackUserIds);
@@ -85,11 +88,11 @@ public class UserFeedRefreshConsumer {
         return feed;
     }
 
-    private List<CorgiVlog> recallRecommendVlog(String userId, String ctime, int size) {
+    private List<CorgiVlog> recallRecommendVlog(String userId, String ctime, int size, String type) {
         CorgiVlog recall = new CorgiVlog();
         recall.setCtime(ctime);
         recall.setUserId(userId);
-        recall.setType("like");
+        recall.setType(type);
         return corgiVlogService.recallVlog(recall, size);
     }
 
