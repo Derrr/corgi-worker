@@ -82,7 +82,7 @@ public class PushService {
         }
         String url = HOST + orgName + "/" + appName + MESSAGE_URL;
         HashMap message = new HashMap();
-        if(HELPER.equals(pushMessage.getSourceUserId())){
+        if (HELPER.equals(pushMessage.getSourceUserId())) {
             message.put("from", pushMessage.getSourceUserId());
         }
         message.put("target_type", "users");
@@ -90,7 +90,7 @@ public class PushService {
         HashMap msg = new HashMap();
         try {
             HashMap apnsContent = new HashMap();
-            apnsContent.put("em_push_content",new String(pushMessage.getMessage().getBytes(),"UTF-8"));
+            apnsContent.put("em_push_content", new String(pushMessage.getMessage().getBytes(), "UTF-8"));
             extra.put("em_apns_ext", apnsContent);
             msg.put("msg", new String(pushMessage.getMessage().getBytes(), "UTF-8"));
         } catch (UnsupportedEncodingException e) {
@@ -138,7 +138,7 @@ public class PushService {
                 httpPost.setHeader("Authorization", "Bearer " + token);
             }
             log.info("request: {} ", JSONObject.toJSONString(message));
-            StringEntity stringEntity = new StringEntity(JSONObject.toJSONString(message),Charset.forName("UTF-8"));
+            StringEntity stringEntity = new StringEntity(JSONObject.toJSONString(message), Charset.forName("UTF-8"));
             stringEntity.setContentType("application/json;charset=UTF-8");
 
             httpPost.setEntity(stringEntity);

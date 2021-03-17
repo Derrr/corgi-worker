@@ -5,7 +5,9 @@ import com.corgi.common.CorgiQueueName;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.service.PushService;
 import com.corgi.user.api.CorgiUserDateService;
+import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.CorgiDate;
+import com.corgi.user.entity.UserDetail;
 import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
@@ -29,6 +31,8 @@ import java.util.concurrent.TimeUnit;
 public class UserDateConsumer {
     @Reference
     private CorgiUserDateService corgiUserDateService;
+    @Reference
+    private CorgiUserService corgiUserService;
     @Autowired
     private PushService pushService;
     @Autowired
@@ -77,6 +81,7 @@ public class UserDateConsumer {
 
                     corgiDate.setTakenUser(takenUser);
                     corgiDate.setStatus("taken");
+                    corgiUserDateService.updateDate(corgiDate);
                     sendMessage(corgiDate);
                 } finally {
                     deleteLock(takenUser);
@@ -88,8 +93,15 @@ public class UserDateConsumer {
 
     private void sendMessage(CorgiDate corgiDate) {
         PushMessage pushMessage = new PushMessage();
-        pushMessage.setSourceUserId(corgiDate.getUserId());
+        pushMessage.setSourceUserId(PushService.HELPER);
         pushMessage.setTargetUserId(corgiDate.getTakenUser());
+        HashMap<String, String> extra = new HashMap<>();
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(corgiDate.getUserId());
+        extra.put("type", "907");
+        extra.put("userId", corgiDate.getUserId());
+        extra.put("avatarUrl",userDetail.getAvatar());
+        extra.put("nickname",userDetail.getNickname());
+        pushMessage.setExtra(extra);
         pushService.sendMessage(pushMessage);
     }
 
