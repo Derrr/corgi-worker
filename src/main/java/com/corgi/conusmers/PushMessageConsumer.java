@@ -108,9 +108,6 @@ public class PushMessageConsumer {
                 }
                 page++;
                 total += sendBatchPosition(userPositions, pushMessage);
-                if (userPositions.size() < pageSize) {
-                    break;
-                }
             }
             PushMessage reply = new PushMessage();
             reply.setSourceUserId(PushService.HELPER);
