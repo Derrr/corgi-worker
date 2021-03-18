@@ -45,6 +45,7 @@ public class UserDateConsumer {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         CorgiDate search = new CorgiDate();
         search.setCity(corgiDate.getCity());
+        search.setStatus("open");
         if (!"不限".equals(corgiDate.getType())) {
             search.setType(corgiDate.getType());
         }
@@ -99,8 +100,8 @@ public class UserDateConsumer {
         UserDetail userDetail = corgiUserService.getUserDetailBasic(corgiDate.getUserId());
         extra.put("type", "907");
         extra.put("userId", corgiDate.getUserId());
-        extra.put("avatarUrl",userDetail.getAvatar());
-        extra.put("nickname",userDetail.getNickname());
+        extra.put("avatarUrl", userDetail.getAvatar());
+        extra.put("nickname", userDetail.getNickname());
         pushMessage.setExtra(extra);
         pushService.sendMessage(pushMessage);
     }
