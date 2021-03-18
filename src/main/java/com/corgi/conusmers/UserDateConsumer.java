@@ -96,6 +96,7 @@ public class UserDateConsumer {
 
     private void sendMessage(CorgiDate corgiDate) {
         PushMessage pushMessage = new PushMessage();
+        pushMessage.setMessage("约会成功！");
         pushMessage.setSourceUserId(PushService.HELPER);
         pushMessage.setTargetUserId(corgiDate.getTakenUser());
         HashMap<String, String> extra = new HashMap<>();
