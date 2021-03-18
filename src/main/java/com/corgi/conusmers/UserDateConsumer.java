@@ -64,6 +64,7 @@ public class UserDateConsumer {
             }
         }
         List<CorgiDate> dates = corgiUserDateService.searchDate(search);
+        log.info("dates:{} ", dates);
         if (!CollectionUtils.isEmpty(dates)) {
             for (CorgiDate date : dates) {
                 String takenUser = date.getUserId();
@@ -89,6 +90,7 @@ public class UserDateConsumer {
                 }
             }
         }
+        log.info("date:{} ", corgiDate);
         corgiUserDateService.addDate(corgiDate);
     }
 
