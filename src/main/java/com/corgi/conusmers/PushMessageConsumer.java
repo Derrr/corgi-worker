@@ -135,8 +135,10 @@ public class PushMessageConsumer {
                         itPosition.remove();
                     } else {
                         String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + position.getUserId();
-                        Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "1", 7L, TimeUnit.DAYS);
-                        if (!result) {
+                        String userKey = "match90sentTarget_" + "_" + position.getUserId();
+                        Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "1", 30L, TimeUnit.DAYS);
+                        Boolean userResult = redisTemplate.opsForValue().setIfAbsent(userKey, "1", 1L, TimeUnit.DAYS);
+                        if (!result || !userResult) {
                             itPosition.remove();
                         }
                     }
