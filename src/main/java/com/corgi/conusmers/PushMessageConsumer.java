@@ -60,18 +60,28 @@ public class PushMessageConsumer {
                 extra.put("type", PushMessage.MATCH_MESSAGE_TYPE + "");
                 pushMessage.setMessage(PushMessage.MATCH_MESSAGE);
             }
-            pushService.sendMessage(pushMessage);
+            String key = "followUser_" + pushMessage.getSourceUserId() + "_" + pushMessage.getTargetUserId();
+            if (redisTemplate.opsForValue().setIfAbsent(key, "1", 10L, TimeUnit.MINUTES)) {
+                pushService.sendMessage(pushMessage);
+            }
         } else if (PushMessage.MATCH.equals(pushMessage.getType())) {
             List<String> userIds = getUserProfileList(pushMessage);
             if (CollectionUtils.isNotEmpty(userIds)) {
                 for (String userId : userIds) {
                     String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + userId;
-                    Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "1", 7L, TimeUnit.DAYS);
+                    Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "1", 30L, TimeUnit.DAYS);
                     if (!result) {
+                        continue;
+                    }
+                    String userKey = "match90sentUser_" + userId;
+                    if (redisTemplate.hasKey(userKey)) {
                         continue;
                     }
                     int match = corgiUserFollowService.isFollowed(pushMessage.getSourceUserId(), userId);
                     if (match >= 3) {
+                        if (!redisTemplate.opsForValue().setIfAbsent(userKey, "1", 1L, TimeUnit.DAYS)) {
+                            continue;
+                        }
                         pushMessage.setTargetUserId(userId);
                         pushService.sendMessage(pushMessage);
                         PushLog pushLog = new PushLog();
@@ -135,10 +145,8 @@ public class PushMessageConsumer {
                         itPosition.remove();
                     } else {
                         String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + position.getUserId();
-                        String userKey = "match90sentTarget_" + "_" + position.getUserId();
-                        Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "1", 30L, TimeUnit.DAYS);
-                        Boolean userResult = redisTemplate.opsForValue().setIfAbsent(userKey, "1", 1L, TimeUnit.DAYS);
-                        if (!result || !userResult) {
+                        Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "1", 7L, TimeUnit.DAYS);
+                        if (!result) {
                             itPosition.remove();
                         }
                     }
