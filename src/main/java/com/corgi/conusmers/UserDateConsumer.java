@@ -42,71 +42,70 @@ public class UserDateConsumer {
     @RabbitHandler
     public void process(Channel channel, Message message, CorgiDate corgiDate) {
         corgiDate.setStatus("open");
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        CorgiDate search = new CorgiDate();
-        search.setCity(corgiDate.getCity());
-        search.setStatus("open");
-        if (!"不限".equals(corgiDate.getType())) {
-            search.setType(corgiDate.getType());
-        }
-        if (!"0".equals(corgiDate.getPayType())) {
-            search.setPayType(getPayType(corgiDate.getPayType()));
-        }
-        if (!"0".equals(corgiDate.getEndTime())) {
-            search.setEndTime(sdf.format(new Date()));
-            try {
-                Integer size = Integer.parseInt(corgiDate.getEndTime());
-                Calendar calendar = Calendar.getInstance();
-                calendar.add(Calendar.DATE, size);
-                corgiDate.setEndTime(sdf.format(calendar.getTime()));
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
-        }
-        List<CorgiDate> dates = corgiUserDateService.searchDate(search);
-        log.info("dates:{} ", dates);
-        if (!CollectionUtils.isEmpty(dates)) {
-            for (CorgiDate date : dates) {
-                String takenUser = date.getUserId();
-                if (!getLock(takenUser)) {
-                    continue;
-                }
-                try {
-                    CorgiDate takenDate = corgiUserDateService.getDateById(date.getId());
-                    if (!"open".equals(takenDate.getStatus())) {
-                        continue;
-                    }
-                    takenDate.setTakenUser(corgiDate.getUserId());
-                    takenDate.setStatus("taken");
-                    corgiUserDateService.updateDate(takenDate);
-                    sendMessage(takenDate);
-
-                    corgiDate.setTakenUser(takenUser);
-                    corgiDate.setStatus("taken");
-                    corgiUserDateService.updateDate(corgiDate);
-                    sendMessage(corgiDate);
-                } finally {
-                    deleteLock(takenUser);
-                }
-            }
-        }
-        log.info("date:{} ", corgiDate);
-        corgiUserDateService.addDate(corgiDate);
+        return;
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//        CorgiDate search = new CorgiDate();
+//        search.setCity(corgiDate.getCity());
+//        search.setStatus("open");
+//        if (!"不限".equals(corgiDate.getType())) {
+//            search.setType(corgiDate.getType());
+//        }
+//        if (!"0".equals(corgiDate.getPayType())) {
+//            search.setPayType(getPayType(corgiDate.getPayType()));
+//        }
+//        if (!"0".equals(corgiDate.getEndTime())) {
+//            search.setEndTime(sdf.format(new Date()));
+//            try {
+//                Integer size = Integer.parseInt(corgiDate.getEndTime());
+//                Calendar calendar = Calendar.getInstance();
+//                calendar.add(Calendar.DATE, size);
+//                corgiDate.setEndTime(sdf.format(calendar.getTime()));
+//            } catch (Exception e) {
+//                log.error(e.getMessage(), e);
+//            }
+//        }
+//        List<CorgiDate> dates = corgiUserDateService.searchDate(search);
+//        log.info("dates:{} ", dates);
+//        if (!CollectionUtils.isEmpty(dates)) {
+//            for (CorgiDate date : dates) {
+//                String takenUser = date.getUserId();
+//                if (!getLock(takenUser)) {
+//                    continue;
+//                }
+//                try {
+//                    CorgiDate takenDate = corgiUserDateService.getDateById(date.getId());
+//                    if (!"open".equals(takenDate.getStatus())) {
+//                        continue;
+//                    }
+//                    takenDate.setStatus("taken");
+//                    corgiUserDateService.updateDate(takenDate);
+//                    sendMessage(takenDate);
+//
+//                    corgiDate.setStatus("taken");
+//                    corgiUserDateService.updateDate(corgiDate);
+//                    sendMessage(corgiDate);
+//                } finally {
+//                    deleteLock(takenUser);
+//                }
+//            }
+//        }
+//        log.info("date:{} ", corgiDate);
+//        corgiUserDateService.addDate(corgiDate);
     }
 
     private void sendMessage(CorgiDate corgiDate) {
-        PushMessage pushMessage = new PushMessage();
-        pushMessage.setMessage("约会成功！");
-        pushMessage.setSourceUserId(PushService.HELPER);
-        pushMessage.setTargetUserId(corgiDate.getTakenUser());
-        HashMap<String, String> extra = new HashMap<>();
-        UserDetail userDetail = corgiUserService.getUserDetailBasic(corgiDate.getUserId());
-        extra.put("type", "907");
-        extra.put("userId", corgiDate.getUserId());
-        extra.put("avatarUrl", userDetail.getAvatar());
-        extra.put("nickname", userDetail.getNickname());
-        pushMessage.setExtra(extra);
-        pushService.sendMessage(pushMessage);
+//        PushMessage pushMessage = new PushMessage();
+//        pushMessage.setMessage("约会成功！");
+//        pushMessage.setSourceUserId(PushService.HELPER);
+//        pushMessage.setTargetUserId(corgiDate.getTakenUser());
+//        HashMap<String, String> extra = new HashMap<>();
+//        UserDetail userDetail = corgiUserService.getUserDetailBasic(corgiDate.getUserId());
+//        extra.put("type", "907");
+//        extra.put("userId", corgiDate.getUserId());
+//        extra.put("avatarUrl", userDetail.getAvatar());
+//        extra.put("nickname", userDetail.getNickname());
+//        pushMessage.setExtra(extra);
+//        pushService.sendMessage(pushMessage);
     }
 
     private boolean getLock(String userId) {
