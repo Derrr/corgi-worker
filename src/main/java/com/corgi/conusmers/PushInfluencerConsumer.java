@@ -2,6 +2,8 @@ package com.corgi.conusmers;
 
 import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.service.PushService;
@@ -41,34 +43,34 @@ public class PushInfluencerConsumer {
     @RabbitHandler
     public void process(PushMessage pushMessage) {
         String userId = pushMessage.getTargetUserId();
+        UserDetail detail = corgiUserService.getUserDetail(userId, null);
         pushMessage.setSourceUserId(PushService.HELPER);
         pushMessage.setMessage("恭喜！成为Corgi的万里挑一的天菜创始人，多发动态及时跟粉丝互动哦，记得私信可小基加入天菜创始人宇宙1群哦，获取更多涨粉秘籍！");
         pushService.sendMessage(pushMessage);
 
-        List<String> matchUserIds = new ArrayList<>();
+        HashMap<String, Object> extra = new HashMap<>();
+        extra.put("type", "907");
+        JSONArray content = new JSONArray();
+        content.add(new JSONObject().fluentPut("text", "您关注的 "));
+        content.add(new JSONObject().fluentPut("text", "@" + detail.getNickname()).fluentPut("url", userId).fluentPut("urlType", "4"));
+        content.add(new JSONObject().fluentPut("text", " 成为Corgi万里挑一的天菜创始人啦，快给他点个赞沾沾喜气，快让他给你分享下天菜创始人的修炼秘密吧。"));
+        content.add(new JSONObject().fluentPut("text", "看看他>").fluentPut("url", userId).fluentPut("urlType", "4"));
+        extra.put("content", content);
+        pushMessage.setExtra(extra);
         pushMessage.setMessage("您关注的人成为Corgi万里挑一的天菜创始人啦，快给他点个赞沾沾喜气，快让他给你分享下天菜创始人的修炼秘密吧");
         int page = 1;
         while (true) {
-            List<UserProfile> fans = corgiUserFollowService.getFollowedUserByPage(userId, 0l, page, 500);
+            List<UserProfile> fans = corgiUserFollowService.getFollowedUserByPage(userId, 0l, page, 300);
             if (CollectionUtils.isEmpty(fans)) {
                 break;
             }
             List<String> userIds = new ArrayList<>();
             for (UserProfile fan : fans) {
-                if (corgiUserFollowService.isFollowed(userId, fan.getUserId()) == 3) {
-                    matchUserIds.add(fan.getUserId());
-                } else {
-                    userIds.add(fan.getUserId());
-                }
+                userIds.add(fan.getUserId());
             }
             pushService.sendMessage(pushMessage, userIds);
             page++;
         }
-
-        pushMessage.setMessage("您的好友成为Corgi万里挑一的天菜创始人啦，快给他点个赞沾沾喜气，快让他给你分享下天菜创始人的修炼秘密吧");
-        pushService.sendMessage(pushMessage, matchUserIds);
-
-        UserDetail detail = corgiUserService.getUserDetail(userId, null);
         Double lat = detail.getLat();
         Double lng = detail.getLng();
         if (lat > 200) {
@@ -91,6 +93,11 @@ public class PushInfluencerConsumer {
                 }
             }
         }
+        content = new JSONArray();
+        content.add(new JSONObject().fluentPut("text", "可基哟～～你周围又诞生了一位天菜创始人，快去基达地图上康康他是不是你的菜。"));
+        content.add(new JSONObject().fluentPut("text", "看看他>").fluentPut("url", userId).fluentPut("urlType", "4"));
+        extra.put("content", content);
+        pushMessage.setExtra(extra);
         pushMessage.setMessage("可基哟～～你周围又诞生了一位天菜创始人，快去基达地图上康康他是不是你的菜。");
         pushService.sendMessage(pushMessage, resultIds);
     }

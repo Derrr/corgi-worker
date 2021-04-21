@@ -2,6 +2,8 @@ package com.corgi.conusmers;
 
 import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.service.PushService;
@@ -11,6 +13,7 @@ import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserProfile;
 import com.corgi.user.entity.UserQuery;
+import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -19,6 +22,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -72,6 +77,15 @@ public class PushRegisterConsumer {
             }
         }
         pushMessage.setMessage("可基哟～～你周围又有一位小哥哥注册Corgi啦，快来看看是不是你的菜。");
+        HashMap<String, Object> extra = new HashMap<>();
+        extra.put("type", "907");
+        JSONArray content = new JSONArray();
+        content.add(new JSONObject().fluentPut("text", "可基哟～～你周围又有一位小哥哥 "));
+        content.add(new JSONObject().fluentPut("text", "@"+detail.getNickname()).fluentPut("url", detail.getUserId()).fluentPut("urlType", "4"));
+        content.add(new JSONObject().fluentPut("text", " 注册Corgi啦，快来看看是不是你的菜。"));
+        content.add(new JSONObject().fluentPut("text", " 看看他>>").fluentPut("url", detail.getUserId()).fluentPut("urlType", "4"));
+        extra.put("content", content);
+        pushMessage.setExtra(extra);
         pushService.sendMessage(pushMessage, resultIds);
     }
 
