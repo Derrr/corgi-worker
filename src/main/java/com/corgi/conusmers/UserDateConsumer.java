@@ -40,9 +40,8 @@ public class UserDateConsumer {
 
 
     @RabbitHandler
-    public void process(Channel channel, Message message, CorgiDate corgiDate) {
-        corgiDate.setStatus("open");
-        return;
+    public void process(PushMessage pushMessage) {
+        pushService.sendMessage(pushMessage);
 //        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 //        CorgiDate search = new CorgiDate();
 //        search.setCity(corgiDate.getCity());
