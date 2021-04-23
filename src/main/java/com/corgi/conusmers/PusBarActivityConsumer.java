@@ -40,7 +40,7 @@ public class PusBarActivityConsumer {
     @RabbitHandler
     public void process(PushMessage pushMessage) {
         String barId = pushMessage.getTargetUserId();
-        pushMessage.setSourceUserId(PushService.HELPER);
+        pushMessage.setSourceUserId(PushService.CORGI_HELPER);
 
         pushMessage.setMessage("您关注的商户发布了新活动，快约上集美们一起去玩玩呀。");
         int page = 1;

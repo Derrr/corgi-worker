@@ -44,7 +44,7 @@ public class PushInfluencerConsumer {
     public void process(PushMessage pushMessage) {
         String userId = pushMessage.getTargetUserId();
         UserDetail detail = corgiUserService.getUserDetail(userId, null);
-        pushMessage.setSourceUserId(PushService.HELPER);
+        pushMessage.setSourceUserId(PushService.CORGI_HELPER);
         pushMessage.setMessage("恭喜！成为Corgi的万里挑一的天菜创始人，多发动态及时跟粉丝互动哦，记得私信可小基加入天菜创始人宇宙1群哦，获取更多涨粉秘籍！");
         pushService.sendMessage(pushMessage);
 

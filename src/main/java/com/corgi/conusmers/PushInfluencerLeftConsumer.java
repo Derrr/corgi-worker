@@ -33,7 +33,7 @@ public class PushInfluencerLeftConsumer {
 
     @RabbitHandler
     public void process(PushMessage pushMessage) {
-        pushMessage.setSourceUserId(PushService.HELPER);
+        pushMessage.setSourceUserId(PushService.CORGI_HELPER);
         pushMessage.setMessage("很遗憾，由于长时间未登陆，可小基暂时取消了您的天菜创始人标志，请多多发些动态以及和粉丝们互动哦。");
         pushService.sendMessage(pushMessage);
     }

@@ -99,7 +99,7 @@ public class PushMessageConsumer {
         } else if (PushMessage.CITY.equals(pushMessage.getType())) {
             String city = (String) pushMessage.getExtra().get("city");
             String userId = pushMessage.getSourceUserId();
-            pushMessage.setSourceUserId(PushService.HELPER);
+            pushMessage.setSourceUserId(PushService.CORGI_HELPER);
             List<String> beBlackList = corgiBlacklistService.getBeBlacked(userId);
             int page = 1;
             int pageSize = 500;
@@ -120,7 +120,7 @@ public class PushMessageConsumer {
                 total += sendBatchPosition(userPositions, pushMessage);
             }
             PushMessage reply = new PushMessage();
-            reply.setSourceUserId(PushService.HELPER);
+            reply.setSourceUserId(PushService.CORGI_HELPER);
             reply.setTargetUserId(userId);
             reply.setMessage("嘿！你的“一呼百应”触发成功，已经告知了活动地点附近 " + total + " 个小哥哥哦，等待一个小红点吧");
             pushService.sendMessage(reply);
@@ -129,7 +129,7 @@ public class PushMessageConsumer {
             String city = (String) pushMessage.getExtra().get("city");
 
             String userId = pushMessage.getSourceUserId();
-            pushMessage.setSourceUserId(PushService.HELPER);
+            pushMessage.setSourceUserId(PushService.CORGI_HELPER);
             int page = 1;
             int pageSize = 500;
             while (true) {
@@ -165,7 +165,7 @@ public class PushMessageConsumer {
         int page = 1;
         int pageSize = 500;
         String sourceId = pushMessage.getSourceUserId();
-        pushMessage.setSourceUserId(PushService.HELPER);
+        pushMessage.setSourceUserId(PushService.CORGI_HELPER);
         while (true) {
             List<UserPosition> userPositions = corgiUserService.getFollowedCityUser(sourceId, city, page, pageSize);
             page++;
@@ -194,7 +194,7 @@ public class PushMessageConsumer {
     private void sendSignUp(PushMessage pushMessage) {
         String activityId = (String) pushMessage.getExtra().get("activityId");
         List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, null, UserSignUp.AGREE + "");
-        pushMessage.setSourceUserId(PushService.HELPER);
+        pushMessage.setSourceUserId(PushService.CORGI_HELPER);
         sendBatch(userProfiles, pushMessage);
     }
 
@@ -212,7 +212,7 @@ public class PushMessageConsumer {
             i++;
         }
         if (CollectionUtils.isNotEmpty(registrationIds)) {
-            pushMessage.setSourceUserId(PushService.HELPER);
+            pushMessage.setSourceUserId(PushService.CORGI_HELPER);
             pushService.sendMessage(pushMessage, registrationIds);
         }
         return i;

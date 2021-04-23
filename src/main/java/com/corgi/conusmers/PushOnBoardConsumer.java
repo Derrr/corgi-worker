@@ -41,7 +41,7 @@ public class PushOnBoardConsumer {
     public void process(PushMessage pushMessage) {
         String userId = pushMessage.getTargetUserId();
         UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
-        pushMessage.setSourceUserId(PushService.HELPER);
+        pushMessage.setSourceUserId(PushService.CORGI_HELPER);
         pushMessage.setMessage("撒花撒花～宝贝你今天被可小基推荐上榜单啦，快发个动态迎接粉丝小哥哥们的崇拜吧。");
         pushService.sendMessage(pushMessage);
 

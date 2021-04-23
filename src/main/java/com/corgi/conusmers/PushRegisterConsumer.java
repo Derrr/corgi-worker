@@ -47,7 +47,7 @@ public class PushRegisterConsumer {
     @RabbitHandler
     public void process(PushMessage pushMessage) {
         String userId = pushMessage.getTargetUserId();
-        pushMessage.setSourceUserId(PushService.HELPER);
+        pushMessage.setSourceUserId(PushService.CORGI_HELPER);
         pushMessage.setMessage("Corgi终于等到你啦，可小基已经把您的信息推给周边xxx位小哥哥啦，快发些动态展现最美的自己，迎接小哥哥们的招呼吧！");
         pushService.sendMessage(pushMessage);
 

@@ -42,6 +42,7 @@ public class PushService {
     private static final String TOKEN_URL = "/token";
     private final static PoolingHttpClientConnectionManager poolConnManager = new PoolingHttpClientConnectionManager();
     public static ThreadLocal<String> RESULT = new ThreadLocal<>();
+    public static final String CORGI_HELPER = "corgihelper";
     public static final String HELPER = "helper";
 
     @Autowired
