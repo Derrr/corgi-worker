@@ -47,10 +47,6 @@ public class PushRegisterConsumer {
     @RabbitHandler
     public void process(PushMessage pushMessage) {
         String userId = pushMessage.getTargetUserId();
-        pushMessage.setSourceUserId(PushService.CORGI_HELPER);
-        pushMessage.setMessage("Corgi终于等到你啦，可小基已经把您的信息推给周边xxx位小哥哥啦，快发些动态展现最美的自己，迎接小哥哥们的招呼吧！");
-        pushService.sendMessage(pushMessage);
-
         UserDetail detail = corgiUserService.getUserDetail(userId, null);
         if (detail == null) {
             log.error("注册查无此人:{} ", userId);
@@ -76,17 +72,23 @@ public class PushRegisterConsumer {
                 resultIds.add(nearByUserId);
             }
         }
+        pushMessage.setSourceUserId(PushService.CORGI_HELPER);
         pushMessage.setMessage("可基哟～～你周围又有一位小哥哥注册Corgi啦，快来看看是不是你的菜。");
         HashMap<String, Object> extra = new HashMap<>();
         extra.put("type", "907");
         JSONArray content = new JSONArray();
         content.add(new JSONObject().fluentPut("text", "可基哟～～你周围又有一位小哥哥 "));
-        content.add(new JSONObject().fluentPut("text", "@"+detail.getNickname()).fluentPut("url", detail.getUserId()).fluentPut("urlType", "4"));
+        content.add(new JSONObject().fluentPut("text", "@" + detail.getNickname()).fluentPut("url", detail.getUserId()).fluentPut("urlType", "4"));
         content.add(new JSONObject().fluentPut("text", " 注册Corgi啦，快来看看是不是你的菜。"));
         content.add(new JSONObject().fluentPut("text", " 看看他>>").fluentPut("url", detail.getUserId()).fluentPut("urlType", "4"));
         extra.put("content", content);
         pushMessage.setExtra(extra);
         pushService.sendMessage(pushMessage, resultIds);
+        if (resultIds.size() > 0) {
+            pushMessage.setExtra(new HashMap());
+            pushMessage.setMessage("Corgi终于等到你啦，可小基已经把您的信息推给周边 " + resultIds.size() + " 位小哥哥啦，快发些动态展现最美的自己，迎接小哥哥们的招呼吧！");
+            pushService.sendMessage(pushMessage);
+        }
     }
 
 
