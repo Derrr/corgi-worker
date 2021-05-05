@@ -69,8 +69,7 @@ public class PushMessageConsumer {
             if (CollectionUtils.isNotEmpty(userIds)) {
                 for (String userId : userIds) {
                     String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + userId;
-                    Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "1", 30L, TimeUnit.DAYS);
-                    if (!result) {
+                    if (!redisTemplate.opsForValue().setIfAbsent(key, "1", 30L, TimeUnit.DAYS)) {
                         continue;
                     }
                     String userKey = "match90sentUser_" + userId;
