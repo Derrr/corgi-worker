@@ -69,16 +69,16 @@ public class PushMessageConsumer {
             if (CollectionUtils.isNotEmpty(userIds)) {
                 for (String userId : userIds) {
                     String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + userId;
-                    if (!redisTemplate.opsForValue().setIfAbsent(key, "1", 30L, TimeUnit.DAYS)) {
+                    if (!redisTemplate.opsForValue().setIfAbsent(key, System.currentTimeMillis() + "", 30L, TimeUnit.DAYS)) {
                         continue;
                     }
-                    String userKey = "match90sentUser_" + userId;
+                    String userKey = "match90sentUser_" + pushMessage.getSourceUserId();
                     if (redisTemplate.hasKey(userKey)) {
                         continue;
                     }
                     int match = corgiUserFollowService.isFollowed(pushMessage.getSourceUserId(), userId);
                     if (match >= 3) {
-                        if (!redisTemplate.opsForValue().setIfAbsent(userKey, "1", 1L, TimeUnit.DAYS)) {
+                        if (!redisTemplate.opsForValue().setIfAbsent(userKey, System.currentTimeMillis() + "", 1L, TimeUnit.DAYS)) {
                             continue;
                         }
                         pushMessage.setTargetUserId(userId);
