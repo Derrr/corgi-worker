@@ -72,7 +72,7 @@ public class PushMessageConsumer {
                     if (!redisTemplate.opsForValue().setIfAbsent(key, System.currentTimeMillis() + "", 30L, TimeUnit.DAYS)) {
                         continue;
                     }
-                    String userKey = "match90sentUser_" + pushMessage.getSourceUserId();
+                    String userKey = "match90sentUser_" + userId;
                     if (redisTemplate.hasKey(userKey)) {
                         continue;
                     }
