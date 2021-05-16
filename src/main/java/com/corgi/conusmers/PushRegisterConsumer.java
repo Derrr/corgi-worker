@@ -68,7 +68,7 @@ public class PushRegisterConsumer {
         List<String> nearByUsers = corgiUserService.getAllNearByUser(userQuery);
         List<String> resultIds = new ArrayList<>();
         for (String nearByUserId : nearByUsers) {
-            if (redisTemplate.opsForValue().setIfAbsent("register_" + nearByUserId, "1", 1L, TimeUnit.DAYS)) {
+            if (redisTemplate.opsForValue().setIfAbsent("register_" + nearByUserId, "1", 1L, TimeUnit.DAYS) && !nearByUserId.equals(userId)) {
                 resultIds.add(nearByUserId);
             }
         }
