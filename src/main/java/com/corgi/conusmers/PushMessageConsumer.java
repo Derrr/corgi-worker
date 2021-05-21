@@ -11,6 +11,7 @@ import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @RabbitListener(queues = CorgiQueueName.PUSH_MESSAGE_QUEUE)
 public class PushMessageConsumer {
+    public static Double EARTH_RADIUS = 6371.393;
 
     @Autowired
     private PushService pushService;
@@ -43,6 +45,8 @@ public class PushMessageConsumer {
     private CorgiPushLogService corgiPushLogService;
     @Reference
     private CorgiBlacklistService corgiBlacklistService;
+    @Reference
+    private CorgiUserDateService corgiUserDateService;
     @Autowired
     private StringRedisTemplate redisTemplate;
 
@@ -65,9 +69,19 @@ public class PushMessageConsumer {
                 pushService.sendMessage(pushMessage);
             }
         } else if (PushMessage.MATCH.equals(pushMessage.getType())) {
+            this.checkMet(pushMessage);
             List<String> userIds = getUserProfileList(pushMessage);
+            String dateId = pushMessage.getSourceUserId();
+            HashMap extra = pushMessage.getExtra();
+            Double lat = Double.valueOf(extra.get("lat").toString());
+            Double lng = Double.valueOf(extra.get("lng").toString());
             if (CollectionUtils.isNotEmpty(userIds)) {
                 for (String userId : userIds) {
+                    UserPosition position = corgiUserService.getUserPosition(userId);
+                    Double distance = this.getDistance(lat, lng, position);
+                    if (distance != null && distance < 0.02) {
+                        this.checkDate(dateId, userId);
+                    }
                     String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + userId;
                     if (!redisTemplate.opsForValue().setIfAbsent(key, System.currentTimeMillis() + "", 30L, TimeUnit.DAYS)) {
                         continue;
@@ -234,10 +248,78 @@ public class PushMessageConsumer {
         }
     }
 
+    private void checkDate(String dateId, String userId) {
+        CorgiDateApply apply = corgiUserDateService.getUserApply(dateId, userId);
+        if (apply == null || !"agree".equals(apply.getStatus()) && !"ongoing".equals(apply.getProgress())) {
+            return;
+        }
+        HashMap dateExtra = new HashMap();
+        dateExtra.put("type", "301");
+        PushMessage message = new PushMessage();
+        message.setSourceUserId(userId);
+        message.setTargetUserId(dateId);
+        message.setExtra(dateExtra);
+        message.setMessage("你的约会对象进入了你身边20m哦～");
+        pushService.sendMessage(message);
+        message.setSourceUserId(dateId);
+        message.setTargetUserId(userId);
+        pushService.sendMessage(message);
+        apply.setProgress("met");
+        corgiUserDateService.updateApplyProgress(apply);
+    }
+
+    private void checkMet(PushMessage pushMessage) {
+        HashMap extra = pushMessage.getExtra();
+        Double lat = Double.valueOf(extra.get("lat").toString());
+        if (lat > 90) {
+            return;
+        }
+        Double lng = Double.valueOf(extra.get("lng").toString());
+        if (lng > 200) {
+            return;
+        }
+        String userId = pushMessage.getSourceUserId();
+        List<CorgiDateApply> metApplies = corgiUserDateService.getMetApply(userId);
+        if (metApplies == null) {
+            return;
+        }
+
+        for (CorgiDateApply apply : metApplies) {
+            String dateId = apply.getApplyUserId();
+            if (userId.equals(dateId)) {
+                dateId = apply.getApprovalUserId();
+            }
+            UserPosition position = corgiUserService.getUserPosition(dateId);
+            Double distance = this.getDistance(lat, lng, position);
+            if (distance != null && distance > 3.0) {
+                HashMap dateExtra = new HashMap();
+                dateExtra.put("type", "301");
+                PushMessage message = new PushMessage();
+                message.setSourceUserId(userId);
+                message.setTargetUserId(dateId);
+                message.setExtra(dateExtra);
+                message.setMessage("约会已完成，快去对他评价吧～");
+                pushService.sendMessage(message);
+                message.setSourceUserId(dateId);
+                message.setTargetUserId(userId);
+                pushService.sendMessage(message);
+                apply.setProgress("finished");
+                corgiUserDateService.updateApplyProgress(apply);
+            }
+        }
+    }
+
+    private Double getDistance(Double lat, Double lng, UserPosition position) {
+        if (position.getLat() > 90 || position.getLng() > 180) {
+            return null;
+        }
+        return Math.acos((Math.sin(lat) * Math.sin(position.getLat())) + (Math.cos(lat) * Math.cos(position.getLat()) * Math.cos(lng - position.getLng()))) * EARTH_RADIUS;
+    }
+
     private List<String> getUserProfileList(PushMessage pushMessage) {
         HashMap extra = pushMessage.getExtra();
         Double lat = Double.valueOf(extra.get("lat").toString());
-        if (lat > 200) {
+        if (lat > 90) {
             return new ArrayList<>();
         }
         Double lng = Double.valueOf(extra.get("lng").toString());
