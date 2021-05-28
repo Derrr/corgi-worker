@@ -92,7 +92,7 @@ public class PushMessageConsumer {
                     }
                     int match = corgiUserFollowService.isFollowed(pushMessage.getSourceUserId(), userId);
                     if (match >= 3) {
-                        if (!redisTemplate.opsForValue().setIfAbsent(userKey, System.currentTimeMillis() + "", 1L, TimeUnit.DAYS)) {
+                        if (!redisTemplate.opsForValue().setIfAbsent(userKey, System.currentTimeMillis() + "", 20L, TimeUnit.HOURS)) {
                             continue;
                         }
                         pushMessage.setTargetUserId(userId);
@@ -254,7 +254,7 @@ public class PushMessageConsumer {
             return;
         }
         HashMap dateExtra = new HashMap();
-        dateExtra.put("type", "910");
+        dateExtra.put("type", "404");
         dateExtra.put("userId", userId);
         PushMessage message = new PushMessage();
         message.setSourceUserId(userId);
@@ -294,7 +294,7 @@ public class PushMessageConsumer {
             Double distance = this.getDistance(lat, lng, position);
             if (distance != null && distance > 3.0) {
                 HashMap dateExtra = new HashMap();
-                dateExtra.put("type", "909");
+                dateExtra.put("type", "403");
                 dateExtra.put("userId", userId);
                 PushMessage message = new PushMessage();
                 message.setSourceUserId(userId);
