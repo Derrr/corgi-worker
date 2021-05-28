@@ -254,7 +254,8 @@ public class PushMessageConsumer {
             return;
         }
         HashMap dateExtra = new HashMap();
-        dateExtra.put("type", "301");
+        dateExtra.put("type", "910");
+        dateExtra.put("userId", userId);
         PushMessage message = new PushMessage();
         message.setSourceUserId(userId);
         message.setTargetUserId(dateId);
@@ -293,7 +294,8 @@ public class PushMessageConsumer {
             Double distance = this.getDistance(lat, lng, position);
             if (distance != null && distance > 3.0) {
                 HashMap dateExtra = new HashMap();
-                dateExtra.put("type", "301");
+                dateExtra.put("type", "909");
+                dateExtra.put("userId", userId);
                 PushMessage message = new PushMessage();
                 message.setSourceUserId(userId);
                 message.setTargetUserId(dateId);
