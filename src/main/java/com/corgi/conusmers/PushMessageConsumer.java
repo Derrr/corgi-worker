@@ -250,7 +250,7 @@ public class PushMessageConsumer {
 
     private void checkDate(String dateId, String userId) {
         CorgiDateApply apply = corgiUserDateService.getUserApply(dateId, userId);
-        if (apply == null || !"agree".equals(apply.getStatus()) && !"ongoing".equals(apply.getProgress())) {
+        if (apply == null || !"agree".equals(apply.getStatus()) || !"ongoing".equals(apply.getProgress())) {
             return;
         }
         HashMap dateExtra = new HashMap();
