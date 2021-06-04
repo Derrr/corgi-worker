@@ -83,4 +83,9 @@ public class CorgiWorkerApplication {
     public Queue userDateQueue() {
         return new Queue(CorgiQueueName.USER_DATE_QUEUE);
     }
+
+    @Bean
+    public Queue silentPushQueue() {
+        return new Queue(CorgiQueueName.SILENT_PUSH_QUEUE);
+    }
 }
