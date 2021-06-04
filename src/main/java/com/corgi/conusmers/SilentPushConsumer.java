@@ -46,7 +46,7 @@ public class SilentPushConsumer {
         pushMessage.setExtra(extra);
 
         log.info("received message: " + pushMessage);
-        if (PushMessage.ACTIVITY.equals(pushMessage.getType())) {
+        if (PushMessage.FOLLOW.equals(pushMessage.getType())) {
             sendFollowed(pushMessage);
         } else if (PushMessage.CITY.equals(pushMessage.getType())) {
             String city = (String) pushMessage.getExtra().get("city");
