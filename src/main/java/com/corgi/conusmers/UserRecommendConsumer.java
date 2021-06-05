@@ -44,7 +44,7 @@ public class UserRecommendConsumer {
         String userId = calculater.getUserId();
         log.info("calculating... " + userId);
         Long now = System.currentTimeMillis();
-        if (!StringUtils.isEmpty(userId)) {
+        if (StringUtils.isEmpty(userId)) {
             return;
         }
 
@@ -137,7 +137,7 @@ public class UserRecommendConsumer {
         for (int i = 0; i < max; i++) {
             String recId = recList.get(i).getKey();
             Double weight = recList.get(i).getValue();
-            log.info("rec:{}:{} ", recId, weight);
+            log.info("rec:{}:{}:{} ", userId, recId, weight);
             corgiUserRecommendService.addRecUser(userId, recId, weight);
         }
         log.info("add rec:" + (System.currentTimeMillis() - now) + "ms ");
