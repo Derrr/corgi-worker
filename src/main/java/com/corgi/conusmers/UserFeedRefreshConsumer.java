@@ -34,7 +34,7 @@ public class UserFeedRefreshConsumer {
     private CorgiVlogService corgiVlogService;
     @Reference
     private CorgiBlacklistService corgiBlacklistService;
-    @Reference(retries = 1, timeout = 100000)
+    @Reference
     private CorgiUserRecommendService corgiUserRecommendService;
 
     @RabbitHandler
