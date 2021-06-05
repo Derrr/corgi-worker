@@ -45,7 +45,7 @@ public class SilentPushConsumer {
         extra.put("em_ignore_notification", true);
         pushMessage.setExtra(extra);
 
-        log.info("received message: " + pushMessage);
+        log.info("received silent message: " + pushMessage);
         if (PushMessage.FOLLOW.equals(pushMessage.getType())) {
             sendFollowed(pushMessage);
         } else if (PushMessage.CITY.equals(pushMessage.getType())) {

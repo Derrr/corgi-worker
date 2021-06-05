@@ -65,9 +65,9 @@ public class PushMessageConsumer {
                 pushMessage.setMessage(PushMessage.MATCH_MESSAGE);
             }
             String key = "followUser_" + pushMessage.getSourceUserId() + "_" + pushMessage.getTargetUserId();
-            if (redisTemplate.opsForValue().setIfAbsent(key, "1", 10L, TimeUnit.MINUTES)) {
+            //if (redisTemplate.opsForValue().setIfAbsent(key, "1", 10L, TimeUnit.MINUTES)) {
                 pushService.sendMessage(pushMessage);
-            }
+            //}
         } else if (PushMessage.MATCH.equals(pushMessage.getType())) {
             this.checkMet(pushMessage);
             List<String> userIds = getUserProfileList(pushMessage);
