@@ -44,7 +44,7 @@ public class UserRecommendConsumer {
         String userId = calculater.getUserId();
         log.info("calculating... " + userId);
         Long now = System.currentTimeMillis();
-        if (!StringUtils.isEmpty(userId)) {
+        if (StringUtils.isEmpty(userId)) {
             return;
         }
 
