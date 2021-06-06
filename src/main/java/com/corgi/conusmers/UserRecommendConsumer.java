@@ -44,16 +44,9 @@ public class UserRecommendConsumer {
         String userId = calculater.getUserId();
         log.info("calculating... " + userId);
         Long now = System.currentTimeMillis();
-        if (!StringUtils.isEmpty(userId)) {
-            System.out.println(corgiUserRecommendService.getRecUser("1", 5));
-            corgiUserRecommendService.clearRecUser("1");
-            corgiUserRecommendService.addRecUser("1", "1", 0.0);
-            corgiUserRecommendService.clearRecUser("1");
-            corgiUserRecommendService.addRecActivity("1", "1", 0.0);
-
+        if (StringUtils.isEmpty(userId)) {
             return;
         }
-
         int size = 1000;
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -30);
