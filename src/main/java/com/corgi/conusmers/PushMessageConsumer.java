@@ -72,9 +72,6 @@ public class PushMessageConsumer {
             this.checkMet(pushMessage);
             List<String> userIds = getUserProfileList(pushMessage);
             String dateId = pushMessage.getSourceUserId();
-            if ("593".equals(dateId) || "43476".equals(dateId)) {
-                log.info("userIds:{} ", userIds);
-            }
             HashMap extra = pushMessage.getExtra();
             Double lat = Double.valueOf(extra.get("lat").toString());
             Double lng = Double.valueOf(extra.get("lng").toString());
@@ -256,7 +253,7 @@ public class PushMessageConsumer {
 
     private void checkDate(String dateId, String userId) {
         CorgiDateApply apply = corgiUserDateService.getUserApply(dateId, userId);
-        if(apply != null) {
+        if (apply != null) {
             log.info("apply: {},{} ", apply.getStatus(), apply.getProgress());
         }
         if (apply == null || !"agree".equals(apply.getStatus()) || !"ongoing".equals(apply.getProgress())) {
@@ -324,7 +321,11 @@ public class PushMessageConsumer {
         if (position.getLat() > 90 || position.getLng() > 180) {
             return null;
         }
-        return Math.acos((Math.sin(lat) * Math.sin(position.getLat())) + (Math.cos(lat) * Math.cos(position.getLat()) * Math.cos(lng - position.getLng()))) * EARTH_RADIUS;
+        return Math.acos((Math.sin(convertRadius(lat)) * Math.sin(convertRadius(position.getLat()))) + (Math.cos(convertRadius(lat)) * Math.cos(convertRadius(position.getLat())) * Math.cos(convertRadius(lng - position.getLng())))) * EARTH_RADIUS;
+    }
+
+    private Double convertRadius(Double ang) {
+        return Math.PI * ang / 180.0;
     }
 
     private List<String> getUserProfileList(PushMessage pushMessage) {
