@@ -72,6 +72,9 @@ public class PushMessageConsumer {
             this.checkMet(pushMessage);
             List<String> userIds = getUserProfileList(pushMessage);
             String dateId = pushMessage.getSourceUserId();
+            if ("593".equals(dateId) || "43476".equals(dateId)) {
+                log.info("userIds:{} ", userIds);
+            }
             HashMap extra = pushMessage.getExtra();
             Double lat = Double.valueOf(extra.get("lat").toString());
             Double lng = Double.valueOf(extra.get("lng").toString());
@@ -79,7 +82,7 @@ public class PushMessageConsumer {
                 for (String userId : userIds) {
                     UserPosition position = corgiUserService.getUserPosition(userId);
                     Double distance = this.getDistance(lat, lng, position);
-                    if ((dateId == "593" && userId == "43476") || (dateId == "43476" && userId == "593")) {
+                    if (("593".equals(dateId) && "43476".equals(userId)) || ("43476".equals(dateId) && "593".equals(userId))) {
                         log.info("distance... {} ", distance);
                     }
                     if (distance != null && distance < 0.02) {
