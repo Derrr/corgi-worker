@@ -44,7 +44,13 @@ public class UserRecommendConsumer {
         String userId = calculater.getUserId();
         log.info("calculating... " + userId);
         Long now = System.currentTimeMillis();
-        if (StringUtils.isEmpty(userId)) {
+        if (!StringUtils.isEmpty(userId)) {
+            System.out.println(corgiUserRecommendService.getRecUser("1", 5));
+            corgiUserRecommendService.clearRecUser("1");
+            corgiUserRecommendService.addRecUser("1", "1", 0.0);
+            corgiUserRecommendService.clearRecUser("1");
+            corgiUserRecommendService.addRecActivity("1", "1", 0.0);
+
             return;
         }
 
