@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @RabbitListener(queues = CorgiQueueName.SILENT_PUSH_QUEUE)
 public class SilentPushConsumer {
-    public static Double EARTH_RADIUS = 6371.393;
+    public static String SILENCE_HELPER = "silencehelper";
 
     @Autowired
     private PushService pushService;
@@ -61,6 +61,7 @@ public class SilentPushConsumer {
                 sendBatchPosition(userPositions, pushMessage);
             }
         } else {
+            pushMessage.setSourceUserId(SILENCE_HELPER);
             pushService.sendMessage(pushMessage);
         }
     }
@@ -94,6 +95,7 @@ public class SilentPushConsumer {
             i++;
         }
         if (CollectionUtils.isNotEmpty(registrationIds)) {
+            pushMessage.setSourceUserId(SILENCE_HELPER);
             pushService.sendMessage(pushMessage, registrationIds);
         }
         return i;
@@ -112,6 +114,7 @@ public class SilentPushConsumer {
             registrationIds.add(userProfile.getUserId());
         }
         if (CollectionUtils.isNotEmpty(registrationIds)) {
+            pushMessage.setSourceUserId(SILENCE_HELPER);
             pushService.sendMessage(pushMessage, registrationIds);
         }
     }
