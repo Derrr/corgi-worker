@@ -253,10 +253,11 @@ public class PushMessageConsumer {
 
     private void checkDate(String dateId, String userId) {
         CorgiDateApply apply = corgiUserDateService.getUserApply(dateId, userId);
-        if (apply != null) {
-            log.info("apply: {},{} ", apply.getStatus(), apply.getProgress());
-        }
         if (apply == null || !"agree".equals(apply.getStatus()) || !"ongoing".equals(apply.getProgress())) {
+            return;
+        }
+        String key = "check-date_" + apply.getId();
+        if (!redisTemplate.opsForValue().setIfAbsent(key, userId, 1L, TimeUnit.MINUTES)) {
             return;
         }
         HashMap dateExtra = new HashMap();
@@ -298,22 +299,26 @@ public class PushMessageConsumer {
             }
             UserPosition position = corgiUserService.getUserPosition(dateId);
             Double distance = this.getDistance(lat, lng, position);
-            if (distance != null && distance > 3.0) {
-                HashMap dateExtra = new HashMap();
-                dateExtra.put("type", "403");
-                dateExtra.put("userId", userId);
-                PushMessage message = new PushMessage();
-                message.setSourceUserId(userId);
-                message.setTargetUserId(dateId);
-                message.setExtra(dateExtra);
-                message.setMessage("约会已完成，快去对他评价吧～");
-                pushService.sendMessage(message);
-                message.setSourceUserId(dateId);
-                message.setTargetUserId(userId);
-                pushService.sendMessage(message);
-                apply.setProgress("finished");
-                corgiUserDateService.updateApplyProgress(apply);
+            //if (distance != null && distance > 3.0) {
+            String key = "check-met_" + apply.getId();
+            if (!redisTemplate.opsForValue().setIfAbsent(key, userId, 1L, TimeUnit.MINUTES)) {
+                continue;
             }
+            HashMap dateExtra = new HashMap();
+            dateExtra.put("type", "403");
+            dateExtra.put("userId", userId);
+            PushMessage message = new PushMessage();
+            message.setSourceUserId(userId);
+            message.setTargetUserId(dateId);
+            message.setExtra(dateExtra);
+            message.setMessage("约会已完成，快去对他评价吧～");
+            pushService.sendMessage(message);
+            message.setSourceUserId(dateId);
+            message.setTargetUserId(userId);
+            pushService.sendMessage(message);
+            apply.setProgress("finished");
+            corgiUserDateService.updateApplyProgress(apply);
+            //}
         }
     }
 
