@@ -72,7 +72,11 @@ public class UserFeedRefreshConsumer {
         recall.setUserId(userId);
         recall.setType(type);
         recall.setStatus(orderby);
-        return corgiVlogService.recallHotVlog(recall, size);
+        List<CorgiVlog> vlogs = corgiVlogService.recallHotVlog(recall, size);
+        for (CorgiVlog vlog : vlogs) {
+            vlog.setType("hot" + type + orderby + "|");
+        }
+        return vlogs;
     }
 
     private CorgiFeed buildFeed(CorgiVlog vlog, String userId) {
@@ -80,6 +84,7 @@ public class UserFeedRefreshConsumer {
         feed.setFeed(vlog.getActivityId());
         feed.setUserId(userId);
         feed.setFeedUserId(vlog.getUserId());
+        feed.setSource(vlog.getType());
         return feed;
     }
 
@@ -88,7 +93,11 @@ public class UserFeedRefreshConsumer {
         recall.setCtime(ctime);
         recall.setUserId(userId);
         recall.setType(type);
-        return corgiVlogService.recallVlog(recall, size);
+        List<CorgiVlog> vlogs = corgiVlogService.recallVlog(recall, size);
+        for (CorgiVlog vlog : vlogs) {
+            vlog.setType("like|");
+        }
+        return vlogs;
     }
 
     private List<CorgiVlog> recallRecommendUser(String userId, String ctime) {
@@ -115,6 +124,9 @@ public class UserFeedRefreshConsumer {
                 break;
             }
         }
+        for (CorgiVlog vlog : vlogs) {
+            vlog.setType("user|");
+        }
         return vlogs;
     }
 
@@ -122,7 +134,11 @@ public class UserFeedRefreshConsumer {
         CorgiVlog recall = new CorgiVlog();
         recall.setCtime(ctime);
         recall.setUserId(userId);
-        return corgiVlogService.recallVlog(recall, 1);
+        List<CorgiVlog> vlogs = corgiVlogService.recallVlog(recall, 1);
+        for (CorgiVlog vlog : vlogs) {
+            vlog.setType("new|");
+        }
+        return vlogs;
     }
 
     private List<CorgiVlog> merge(List<CorgiVlog> result, List<CorgiVlog> newVlog, List<String> blackUserIds) {
@@ -141,6 +157,7 @@ public class UserFeedRefreshConsumer {
             for (CorgiVlog olog : result) {
                 if (olog.getActivityId().equals(vlog.getActivityId())) {
                     shouldContinue = true;
+                    olog.setType(olog.getType() + vlog.getType());
                     break;
                 }
             }
