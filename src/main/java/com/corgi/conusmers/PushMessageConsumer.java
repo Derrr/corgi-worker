@@ -82,7 +82,7 @@ public class PushMessageConsumer {
                     if (("593".equals(dateId) && "43476".equals(userId)) || ("43476".equals(dateId) && "593".equals(userId))) {
                         log.info("distance... {} ", distance);
                     }
-                    if (distance != null && distance < 0.02) {
+                    if (distance != null && distance < 0.05) {
                         this.checkDate(dateId, userId);
                     }
                     String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + userId;
