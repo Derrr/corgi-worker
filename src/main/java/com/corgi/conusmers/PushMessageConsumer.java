@@ -63,9 +63,19 @@ public class PushMessageConsumer {
             } else {
                 extra.put("type", PushMessage.MATCH_MESSAGE_TYPE + "");
                 pushMessage.setMessage(PushMessage.MATCH_MESSAGE);
+                String tmpKey = "followUser_" + pushMessage.getSourceUserId() + "_" + pushMessage.getTargetUserId();
+                if (redisTemplate.opsForValue().setIfAbsent(tmpKey, "1", 1L, TimeUnit.SECONDS)) {
+                    pushService.sendMessage(pushMessage);
+                }
+
+                //调换发送者和接受者
+                String sourceId = pushMessage.getTargetUserId();
+                pushMessage.setTargetUserId(pushMessage.getSourceUserId());
+                pushMessage.setSourceUserId(sourceId);
+                extra.put("userId", sourceId);
             }
             String key = "followUser_" + pushMessage.getSourceUserId() + "_" + pushMessage.getTargetUserId();
-            if (redisTemplate.opsForValue().setIfAbsent(key, "1", 10L, TimeUnit.MINUTES)) {
+            if (redisTemplate.opsForValue().setIfAbsent(key, "1", 1L, TimeUnit.SECONDS)) {
                 pushService.sendMessage(pushMessage);
             }
         } else if (PushMessage.MATCH.equals(pushMessage.getType())) {
