@@ -269,6 +269,7 @@ public class PushMessageConsumer {
         message.setExtra(dateExtra);
         message.setMessage("你的约会对象进入了你身边20m哦～");
         pushService.sendMessage(message);
+        dateExtra.put("userId", dateId);
         message.setSourceUserId(dateId);
         message.setTargetUserId(userId);
         pushService.sendMessage(message);
@@ -313,6 +314,7 @@ public class PushMessageConsumer {
             message.setExtra(dateExtra);
             message.setMessage("约会已完成，快去对他评价吧～");
             pushService.sendMessage(message);
+            dateExtra.put("userId", dateId);
             message.setSourceUserId(dateId);
             message.setTargetUserId(userId);
             pushService.sendMessage(message);
