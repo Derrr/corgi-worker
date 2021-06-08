@@ -267,7 +267,7 @@ public class PushMessageConsumer {
         message.setSourceUserId(userId);
         message.setTargetUserId(dateId);
         message.setExtra(dateExtra);
-        message.setMessage("你的约会对象进入了你身边20m哦～");
+        message.setMessage("你的约会对象进入了你身边50m哦～");
         pushService.sendMessage(message);
         dateExtra.put("userId", dateId);
         message.setSourceUserId(dateId);
