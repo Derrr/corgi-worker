@@ -271,7 +271,7 @@ public class PushMessageConsumer {
             return;
         }
         HashMap dateExtra = new HashMap();
-        dateExtra.put("type", "404");
+        dateExtra.put("type", "403");
         dateExtra.put("userId", userId);
         PushMessage message = new PushMessage();
         message.setSourceUserId(userId);
@@ -316,7 +316,7 @@ public class PushMessageConsumer {
                 continue;
             }
             HashMap dateExtra = new HashMap();
-            dateExtra.put("type", "403");
+            dateExtra.put("type", "404");
             dateExtra.put("userId", userId);
             PushMessage message = new PushMessage();
             message.setSourceUserId(userId);
