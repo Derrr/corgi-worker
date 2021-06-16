@@ -96,9 +96,6 @@ public class PushMessageConsumer {
                         this.checkDate(dateId, userId);
                     }
                     String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + userId;
-                    if (!redisTemplate.opsForValue().setIfAbsent(key, System.currentTimeMillis() + "", 30L, TimeUnit.DAYS)) {
-                        continue;
-                    }
                     String userKey = "match90sentUser_" + userId;
                     if (redisTemplate.hasKey(userKey)) {
                         continue;
@@ -106,6 +103,9 @@ public class PushMessageConsumer {
                     int match = corgiUserFollowService.isFollowed(pushMessage.getSourceUserId(), userId);
                     if (match >= 3) {
                         if (!redisTemplate.opsForValue().setIfAbsent(userKey, System.currentTimeMillis() + "", 20L, TimeUnit.HOURS)) {
+                            continue;
+                        }
+                        if (!redisTemplate.opsForValue().setIfAbsent(key, System.currentTimeMillis() + "", 30L, TimeUnit.DAYS)) {
                             continue;
                         }
                         pushMessage.setTargetUserId(userId);
