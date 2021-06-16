@@ -100,7 +100,20 @@ public class PushMessageConsumer {
                     if (redisTemplate.hasKey(userKey)) {
                         continue;
                     }
-                    int match = corgiUserFollowService.isFollowed(pushMessage.getSourceUserId(), userId);
+                    String followKey = "followUser_" + pushMessage.getSourceUserId() + "_" + userId;
+                    String matchStr = redisTemplate.opsForValue().get(followKey);
+                    int match;
+                    if (StringUtils.isNotEmpty(matchStr)) {
+                        try {
+                            match = Integer.valueOf(matchStr);
+                        } catch (Exception e) {
+                            match = corgiUserFollowService.isFollowed(pushMessage.getSourceUserId(), userId);
+                            redisTemplate.opsForValue().set(followKey, match + "", 2, TimeUnit.HOURS);
+                        }
+                    } else {
+                        match = corgiUserFollowService.isFollowed(pushMessage.getSourceUserId(), userId);
+                        redisTemplate.opsForValue().set(followKey, match + "", 2, TimeUnit.HOURS);
+                    }
                     if (match >= 3) {
                         if (!redisTemplate.opsForValue().setIfAbsent(userKey, System.currentTimeMillis() + "", 20L, TimeUnit.HOURS)) {
                             continue;
