@@ -89,7 +89,7 @@ public class UserRecommendConsumer {
                         redisTemplate.opsForList().leftPush(key, fan.getUserId());
                         addWeight(fan.getUserId(), weightMap, fanList);
                     }
-                    redisTemplate.expire(key, 20, TimeUnit.HOURS);
+                    redisTemplate.expire(key, 6, TimeUnit.HOURS);
                 }
                 page++;
             } while (true);
@@ -134,7 +134,7 @@ public class UserRecommendConsumer {
                         redisTemplate.opsForList().leftPush(key, target.getUserId());
                         addRec(target.getUserId(), weightMap.get(fanId), recMap);
                     }
-                    redisTemplate.expire(key, 20, TimeUnit.HOURS);
+                    redisTemplate.expire(key, 6, TimeUnit.HOURS);
                 }
                 page++;
                 if (shouldBreak) {
