@@ -65,21 +65,31 @@ public class UserRecommendConsumer {
             }
             int page = 1;
             do {
-                List<UserProfile> fans = corgiUserFollowService.getFollowedUserByPage(followUser.getUserId(), 0l, page, size);
-                if (CollectionUtils.isEmpty(fans)) {
-                    break;
-                }
-                for (UserProfile fan : fans) {
-                    if (fan == null || fan.getTime() == null) {
-                        continue;
+                String key = "followedUser_" + followUser.getUserId() + "-" + page;
+                List<String> fanIds = redisTemplate.opsForList().range(key, 0, -1);
+                if (!CollectionUtils.isEmpty(fanIds)) {
+                    for (String fanId : fanIds) {
+                        addWeight(fanId, weightMap, fanList);
                     }
-                    if (userId.equals(fan.getUserId())) {
-                        continue;
+                } else {
+                    List<UserProfile> fans = corgiUserFollowService.getFollowedUserByPage(followUser.getUserId(), 0l, page, size);
+                    if (CollectionUtils.isEmpty(fans)) {
+                        break;
                     }
-                    if (fan.getTime() < time) {
-                        continue;
+                    for (UserProfile fan : fans) {
+                        if (fan == null || fan.getTime() == null) {
+                            continue;
+                        }
+                        if (userId.equals(fan.getUserId())) {
+                            continue;
+                        }
+                        if (fan.getTime() < time) {
+                            continue;
+                        }
+                        redisTemplate.opsForList().leftPush(key, fan.getUserId());
+                        addWeight(fan.getUserId(), weightMap, fanList);
                     }
-                    addWeight(fan.getUserId(), weightMap, fanList);
+                    redisTemplate.expire(key, 20, TimeUnit.HOURS);
                 }
                 page++;
             } while (true);
@@ -99,23 +109,32 @@ public class UserRecommendConsumer {
             int page = 1;
             do {
                 boolean shouldBreak = false;
-                List<UserProfile> targets = corgiUserFollowService.getFollowUserByPage(fanId, "active", 0.0, 0.0, page, 100);
-                if (CollectionUtils.isEmpty(targets)) {
-                    break;
-                }
-                for (UserProfile target : targets) {
-                    if (target == null || target.getTime() == null) {
-                        continue;
+                String key = "followUser_" + fanId + "-" + page;
+                List<String> targetIds = redisTemplate.opsForList().range(key, 0, -1);
+                if (!CollectionUtils.isEmpty(targetIds)) {
+                    for (String targetId : targetIds) {
+                        addRec(targetId, weightMap.get(fanId), recMap);
                     }
-                    if (target.getTime() < time) {
-                        shouldBreak = true;
+                } else {
+                    List<UserProfile> targets = corgiUserFollowService.getFollowUserByPage(fanId, "active", 0.0, 0.0, page, 1000);
+                    if (CollectionUtils.isEmpty(targets)) {
                         break;
                     }
-                    if (followUserIds.contains(target.getUserId())) {
-                        continue;
+                    for (UserProfile target : targets) {
+                        if (target == null || target.getTime() == null) {
+                            continue;
+                        }
+                        if (target.getTime() < time) {
+                            shouldBreak = true;
+                            break;
+                        }
+                        if (followUserIds.contains(target.getUserId())) {
+                            continue;
+                        }
+                        redisTemplate.opsForList().leftPush(key, target.getUserId());
+                        addRec(target.getUserId(), weightMap.get(fanId), recMap);
                     }
-                    addRec(target.getUserId(), weightMap.get(fanId), recMap);
-
+                    redisTemplate.expire(key, 20, TimeUnit.HOURS);
                 }
                 page++;
                 if (shouldBreak) {
