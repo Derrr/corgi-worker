@@ -40,7 +40,7 @@ public class UserFeedRefreshConsumer {
     @RabbitHandler
     public void process(String userId) {
         log.info("start feeding...{} ", userId);
-        if (corgiFeedService.countUnviewFeed(userId) >= 20) {
+        if (corgiFeedService.countUnviewFeed(userId) >= 10) {
             return;
         }
         List<String> blackUserIds = new ArrayList<>();
@@ -54,12 +54,12 @@ public class UserFeedRefreshConsumer {
         String ctime = sdf.format(new Date());
         List<CorgiVlog> result = new ArrayList<>();
         result = merge(result, recallNewVlog(userId, ctime), blackUserIds);
-        result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 4, "asc"), blackUserIds);
+        result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 2, "asc"), blackUserIds);
         result = merge(result, recallRecommendUser(userId, ctime), blackUserIds);
-        result = merge(result, recallRecommendVlog(userId, ctime, 16 - result.size(), "like"), blackUserIds);
-        result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.MANUAL, 5, "asc"), blackUserIds);
-        if (result.size() < 20) {
-            result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 20 - result.size(), "desc"), blackUserIds);
+        result = merge(result, recallRecommendVlog(userId, ctime, 10 - result.size(), "like"), blackUserIds);
+        //result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.MANUAL, 5, "asc"), blackUserIds);
+        if (result.size() < 10) {
+            result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 10 - result.size(), "desc"), blackUserIds);
         }
         for (CorgiVlog vlog : result) {
             corgiFeedService.addFeed(buildFeed(vlog, userId));
@@ -120,7 +120,7 @@ public class UserFeedRefreshConsumer {
                 continue;
             }
             vlogs.addAll(vlogList);
-            if (vlogs.size() >= 5) {
+            if (vlogs.size() >= 3) {
                 break;
             }
         }
