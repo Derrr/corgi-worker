@@ -103,7 +103,6 @@ public class PushService {
         Boolean isIgnore = (Boolean) extra.get("em_ignore_notification");
         if (isIgnore != null && isIgnore) {
             HashMap<String,Object> apns = new HashMap<>();
-            apns.put("badge",0);
             message.put("apns",apns);
         }
         try {

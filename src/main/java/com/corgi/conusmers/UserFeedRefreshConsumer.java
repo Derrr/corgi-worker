@@ -33,6 +33,8 @@ public class UserFeedRefreshConsumer {
     @Reference
     private CorgiVlogService corgiVlogService;
     @Reference
+    private CorgiUserService corgiUserService;
+    @Reference
     private CorgiBlacklistService corgiBlacklistService;
     @Reference
     private CorgiUserRecommendService corgiUserRecommendService;
@@ -52,23 +54,29 @@ public class UserFeedRefreshConsumer {
         }
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String ctime = sdf.format(new Date());
+        String groups = null;
+        List<String> groupList = corgiUserService.getPreferGroup(userId);
+        if (!CollectionUtils.isEmpty(groupList)) {
+            groups = String.join("','", groupList);
+        }
         List<CorgiVlog> result = new ArrayList<>();
-        result = merge(result, recallNewVlog(userId, ctime), blackUserIds);
-        result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 2, "asc"), blackUserIds);
+        result = merge(result, recallNewVlog(userId, ctime, groups), blackUserIds);
+        result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 2, "asc", groups), blackUserIds);
         result = merge(result, recallRecommendUser(userId, ctime), blackUserIds);
         //result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.MANUAL, 1, "asc"), blackUserIds);
         result = merge(result, recallRecommendVlog(userId, ctime, 10 - result.size(), "like"), blackUserIds);
         if (result.size() < 10) {
-            result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 10 - result.size(), "desc"), blackUserIds);
+            result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 10 - result.size(), "desc", groups), blackUserIds);
         }
         for (CorgiVlog vlog : result) {
             corgiFeedService.addFeed(buildFeed(vlog, userId));
         }
     }
 
-    private List<CorgiVlog> recallHotVlog(String userId, String ctime, String type, Integer size, String orderby) {
+    private List<CorgiVlog> recallHotVlog(String userId, String ctime, String type, Integer size, String orderby, String groups) {
         CorgiVlog recall = new CorgiVlog();
         recall.setCtime(ctime);
+        recall.setActivityId(groups);
         recall.setUserId(userId);
         recall.setType(type);
         recall.setStatus(orderby);
@@ -130,10 +138,11 @@ public class UserFeedRefreshConsumer {
         return vlogs;
     }
 
-    private List<CorgiVlog> recallNewVlog(String userId, String ctime) {
+    private List<CorgiVlog> recallNewVlog(String userId, String ctime, String type) {
         CorgiVlog recall = new CorgiVlog();
         recall.setCtime(ctime);
         recall.setUserId(userId);
+        recall.setType(type);
         List<CorgiVlog> vlogs = corgiVlogService.recallVlog(recall, 1);
         for (CorgiVlog vlog : vlogs) {
             vlog.setType("new|");
