@@ -59,6 +59,7 @@ public class UserRecommendConsumer {
         List<UserProfile> followUsers = corgiUserFollowService.getFollowUserByPage(userId, "new", 0.0, 0.0, 1, 100);
         log.info("init:" + (System.currentTimeMillis() - now) + "ms ");
         now = System.currentTimeMillis();
+        Integer myCount = 0;
         for (UserProfile followUser : followUsers) {
             if (followUser == null) {
                 continue;
@@ -93,6 +94,7 @@ public class UserRecommendConsumer {
                 }
                 page++;
             } while (true);
+            myCount++;
         }
         log.info("fan count:" + (System.currentTimeMillis() - now) + "ms ");
         now = System.currentTimeMillis();
@@ -152,11 +154,14 @@ public class UserRecommendConsumer {
         now = System.currentTimeMillis();
 
         corgiUserRecommendService.clearRecUser(userId);
+        if (myCount == 0) {
+            myCount = 1;
+        }
         for (int i = 0; i < max; i++) {
             String recId = recList.get(i).getKey();
             Double weight = recList.get(i).getValue();
-            log.info("rec:{}:{}:{} ", userId, recId, weight);
-            corgiUserRecommendService.addRecUser(userId, recId, weight);
+            log.info("rec:{}:{}:{}:{} ", userId, recId, weight, myCount);
+            corgiUserRecommendService.addRecUser(userId, recId, weight / Math.sqrt(myCount.doubleValue()));
         }
         log.info("add rec:" + (System.currentTimeMillis() - now) + "ms ");
     }

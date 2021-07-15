@@ -55,6 +55,7 @@ public class ActivityRecommendConsumer {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String monthAgo = sdf.format(calendar.getTime());
         List<String> likeIds = corgiLikeService.getLikedActivity(userId, 1, 500);
+        Integer myLikeCount = 0;
         int size = 1000;
         for (String activityId : likeIds) {
             int page = 1;
@@ -80,11 +81,12 @@ public class ActivityRecommendConsumer {
                 }
                 page++;
             } while (true);
+            myLikeCount++;
         }
         List<Map.Entry<String, Double>> recList = new ArrayList<>(weightMap.entrySet());
         for (Map.Entry<String, Double> entry : recList) {
             String fanId = entry.getKey();
-            Integer followCount = corgiUserFollowService.countFollow(fanId);
+            Integer followCount = corgiLikeService.countUserLikeByDate(fanId, monthAgo);
             if (followCount > 0) {
                 entry.setValue(entry.getValue() / Math.sqrt(followCount.doubleValue()));
             }
@@ -95,11 +97,14 @@ public class ActivityRecommendConsumer {
             max = 100;
         }
         corgiUserRecommendService.clearRecActivity(userId);
+        if (myLikeCount == 0) {
+            myLikeCount = 1;
+        }
         for (int i = 0; i < max; i++) {
             String recId = recList.get(i).getKey();
             Double weight = recList.get(i).getValue();
-            log.info("adding...{}:{} ",recId,weight);
-            corgiUserRecommendService.addRecActivity(userId, recId, weight);
+            log.info("adding...{}:{} ", recId, weight);
+            corgiUserRecommendService.addRecActivity(userId, recId, weight / Math.sqrt(myLikeCount.doubleValue()));
         }
     }
 
