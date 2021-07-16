@@ -119,6 +119,9 @@ public class UserFeedRefreshConsumer {
         recall.setUserId(userId);
         Random random = new Random();
         for (int i = 0; i < userProfiles.size(); i++) {
+            if (CollectionUtils.isEmpty(userProfiles)) {
+                break;
+            }
             int index = random.nextInt(userProfiles.size());
             UserProfile userProfile = userProfiles.get(index);
             if (userProfile == null || StringUtils.isEmpty(userProfile.getUserId())) {
@@ -134,6 +137,7 @@ public class UserFeedRefreshConsumer {
             if (vlogs.size() >= size) {
                 break;
             }
+            userProfiles.remove(index);
         }
         for (CorgiVlog vlog : vlogs) {
             vlog.setType("user|");
