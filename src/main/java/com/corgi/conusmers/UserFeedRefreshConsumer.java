@@ -1,6 +1,8 @@
 package com.corgi.conusmers;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.corgi.activity.api.CorgiActivityService;
+import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiConstants;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.common.messages.MatchRefresher;
@@ -8,6 +10,7 @@ import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -20,6 +23,7 @@ import org.springframework.util.StringUtils;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author tairanliu
@@ -38,6 +42,10 @@ public class UserFeedRefreshConsumer {
     private CorgiBlacklistService corgiBlacklistService;
     @Reference
     private CorgiUserRecommendService corgiUserRecommendService;
+    @Reference
+    private CorgiBarService corgiBarService;
+    @Reference
+    private CorgiActivityService corgiActivityService;
 
     @RabbitHandler
     public void process(String userId) {
@@ -59,10 +67,13 @@ public class UserFeedRefreshConsumer {
         if (!CollectionUtils.isEmpty(groupList)) {
             groups = String.join("','", groupList);
         }
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
+        String city = userDetail.getCity();
         List<CorgiVlog> result = new ArrayList<>();
-        result = merge(result, recallNewVlog(userId, ctime, groups), blackUserIds);
+        result = merge(result, recallNewVlog(userId, city, groups), blackUserIds);
         result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 2, "asc", groups), blackUserIds);
         result = merge(result, recallRecommendUser(userId, ctime, 3), blackUserIds);
+        result = merge(result, recallCity(userId, city), blackUserIds);
         //result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.MANUAL, 1, "asc"), blackUserIds);
         result = merge(result, recallRecommendVlog(userId, ctime, 10 - result.size(), "like"), blackUserIds);
         if (result.size() < 10) {
@@ -71,6 +82,25 @@ public class UserFeedRefreshConsumer {
         for (CorgiVlog vlog : result) {
             corgiFeedService.addFeed(buildFeed(vlog, userId));
         }
+    }
+
+    private List<CorgiVlog> recallCity(String userId, String city) {
+        if (StringUtils.isEmpty(city)) {
+            return new ArrayList<>();
+        }
+        List<String> barIds = corgiBarService.getBarListByCity(city, null, null)
+                .stream().map(bar -> bar.getBarId()).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(barIds)) {
+            return new ArrayList<>();
+        }
+        CorgiVlog recall = new CorgiVlog();
+        recall.setUserId(userId);
+        recall.setType("id");
+        List<CorgiVlog> vlogList = corgiVlogService.recallTargetVlog(String.join("','", barIds), recall, 1);
+        for (CorgiVlog vlog : vlogList) {
+            vlog.setType("bar|");
+        }
+        return vlogList;
     }
 
     private List<CorgiVlog> recallHotVlog(String userId, String ctime, String type, Integer size, String orderby, String groups) {
@@ -117,6 +147,7 @@ public class UserFeedRefreshConsumer {
         CorgiVlog recall = new CorgiVlog();
         recall.setCtime(ctime);
         recall.setUserId(userId);
+        recall.setType("like");
         Random random = new Random();
         for (int i = 0; i < userProfiles.size(); i++) {
             if (CollectionUtils.isEmpty(userProfiles)) {
@@ -145,15 +176,12 @@ public class UserFeedRefreshConsumer {
         return vlogs;
     }
 
-    private List<CorgiVlog> recallNewVlog(String userId, String ctime, String type) {
+    private List<CorgiVlog> recallNewVlog(String userId, String city, String type) {
         CorgiVlog recall = new CorgiVlog();
-        recall.setCtime(ctime);
         recall.setUserId(userId);
         recall.setType(type);
+        recall.setStatus(city);
         List<CorgiVlog> vlogs = corgiVlogService.recallVlog(recall, 1);
-        for (CorgiVlog vlog : vlogs) {
-            vlog.setType("new|");
-        }
         return vlogs;
     }
 
