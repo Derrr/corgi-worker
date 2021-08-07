@@ -53,6 +53,7 @@ public class UserRecommendConsumer {
         long time = calendar.getTimeInMillis();
         List<String> followUserIds = corgiUserFollowService.getFollowUser(userId);
         followUserIds.add(userId);
+        log.info("followUserIds:{} ", followUserIds);
         List<String> fanList = new ArrayList<>();
         HashMap<String, Double> weightMap = new HashMap<>();
         HashMap<String, Double> recMap = new HashMap<>();
@@ -65,6 +66,7 @@ public class UserRecommendConsumer {
                 continue;
             }
             int page = 1;
+            boolean shouldBreak = false;
             do {
                 String key = "followedUser_" + followUser.getUserId() + "-" + page;
                 List<String> fanIds = redisTemplate.opsForList().range(key, 0, -1);
@@ -85,12 +87,16 @@ public class UserRecommendConsumer {
                             continue;
                         }
                         if (fan.getTime() < time) {
-                            continue;
+                            shouldBreak = true;
+                            break;
                         }
                         redisTemplate.opsForList().leftPush(key, fan.getUserId());
                         addWeight(fan.getUserId(), weightMap, fanList);
                     }
                     redisTemplate.expire(key, 6, TimeUnit.HOURS);
+                }
+                if (shouldBreak) {
+                    break;
                 }
                 page++;
             } while (true);
@@ -138,10 +144,10 @@ public class UserRecommendConsumer {
                     }
                     redisTemplate.expire(key, 6, TimeUnit.HOURS);
                 }
-                page++;
                 if (shouldBreak) {
                     break;
                 }
+                page++;
             } while (true);
         }
         List<Map.Entry<String, Double>> recList = new ArrayList<>(recMap.entrySet());
@@ -162,9 +168,9 @@ public class UserRecommendConsumer {
             Double weight = recList.get(i).getValue();
             log.info("rec:{}:{}:{}:{} ", userId, recId, weight, myCount);
             Double finalWeight = weight / Math.sqrt(myCount.doubleValue());
-            if (finalWeight > 10) {
-                corgiUserRecommendService.addRecUser(userId, recId, finalWeight);
-            }
+            //if (finalWeight > 10) {
+            corgiUserRecommendService.addRecUser(userId, recId, finalWeight);
+            //}
         }
         log.info("add rec:" + (System.currentTimeMillis() - now) + "ms ");
     }
