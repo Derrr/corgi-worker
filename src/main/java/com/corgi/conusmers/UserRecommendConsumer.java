@@ -53,7 +53,6 @@ public class UserRecommendConsumer {
         long time = calendar.getTimeInMillis();
         List<String> followUserIds = corgiUserFollowService.getFollowUser(userId);
         followUserIds.add(userId);
-        log.info("followUserIds:{} ", followUserIds);
         List<String> fanList = new ArrayList<>();
         HashMap<String, Double> weightMap = new HashMap<>();
         HashMap<String, Double> recMap = new HashMap<>();
