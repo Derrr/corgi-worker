@@ -79,6 +79,9 @@ public class UserFeedRefreshConsumer {
         if (result.size() < 10) {
             result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 10 - result.size(), "desc", groups), blackUserIds);
         }
+        if (result.size() < 10) {
+            result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 10 - result.size(), "desc", ""), blackUserIds);
+        }
         if (result.size() < 5) {
             result = merge(result, recallNewVlogBySize(userId, groups, 5 - result.size()), blackUserIds);
         }
