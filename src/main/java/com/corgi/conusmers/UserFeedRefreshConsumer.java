@@ -79,6 +79,9 @@ public class UserFeedRefreshConsumer {
         if (result.size() < 10) {
             result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 10 - result.size(), "desc", groups), blackUserIds);
         }
+        if (result.size() < 10) {
+            result = merge(result, recallNewVlogBySize(userId, 10 - result.size()), blackUserIds);
+        }
         for (CorgiVlog vlog : result) {
             corgiFeedService.addFeed(buildFeed(vlog, userId));
         }
@@ -173,6 +176,13 @@ public class UserFeedRefreshConsumer {
         for (CorgiVlog vlog : vlogs) {
             vlog.setType("user|");
         }
+        return vlogs;
+    }
+
+    private List<CorgiVlog> recallNewVlogBySize(String userId, Integer size) {
+        CorgiVlog recall = new CorgiVlog();
+        recall.setUserId(userId);
+        List<CorgiVlog> vlogs = corgiVlogService.recallVlog(recall, size);
         return vlogs;
     }
 
