@@ -79,11 +79,11 @@ public class UserFeedRefreshConsumer {
         if (result.size() < 10) {
             result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 10 - result.size(), "desc", groups), blackUserIds);
         }
-        if (result.size() < 10) {
-            result = merge(result, recallNewVlogBySize(userId, groups, 10 - result.size()), blackUserIds);
+        if (result.size() < 5) {
+            result = merge(result, recallNewVlogBySize(userId, groups, 5 - result.size()), blackUserIds);
         }
-        if (result.size() < 10) {
-            result = merge(result, recallNewVlogBySize(userId, null, 10 - result.size()), blackUserIds);
+        if (result.size() < 5) {
+            result = merge(result, recallNewVlogBySize(userId, null, 5 - result.size()), blackUserIds);
         }
         for (CorgiVlog vlog : result) {
             corgiFeedService.addFeed(buildFeed(vlog, userId));
