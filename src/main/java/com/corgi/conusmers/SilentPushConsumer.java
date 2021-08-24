@@ -37,31 +37,31 @@ public class SilentPushConsumer {
 
     @RabbitHandler
     public void process(PushMessage pushMessage) {
-        HashMap extra = pushMessage.getExtra();
-        if (extra == null) {
-            extra = new HashMap();
-        }
-        extra.put("em_ignore_notification", true);
-        pushMessage.setExtra(extra);
-
-        log.info("received silent message: " + pushMessage);
-        if (PushMessage.FOLLOW.equals(pushMessage.getType())) {
-            sendFollowed(pushMessage);
-        } else if (PushMessage.CITY.equals(pushMessage.getType())) {
-            String city = (String) pushMessage.getExtra().get("city");
-            int page = 1;
-            int pageSize = 500;
-            while (true) {
-                List<UserPosition> userPositions = corgiUserService.getFollowedCityUser(null, city, page, pageSize);
-                if (CollectionUtils.isEmpty(userPositions)) {
-                    break;
-                }
-                page++;
-                sendBatchPosition(userPositions, pushMessage);
-            }
-        } else {
-            pushService.sendMessage(pushMessage);
-        }
+//        HashMap extra = pushMessage.getExtra();
+//        if (extra == null) {
+//            extra = new HashMap();
+//        }
+//        extra.put("em_ignore_notification", true);
+//        pushMessage.setExtra(extra);
+//
+//        log.info("received silent message: " + pushMessage);
+//        if (PushMessage.FOLLOW.equals(pushMessage.getType())) {
+//            sendFollowed(pushMessage);
+//        } else if (PushMessage.CITY.equals(pushMessage.getType())) {
+//            String city = (String) pushMessage.getExtra().get("city");
+//            int page = 1;
+//            int pageSize = 500;
+//            while (true) {
+//                List<UserPosition> userPositions = corgiUserService.getFollowedCityUser(null, city, page, pageSize);
+//                if (CollectionUtils.isEmpty(userPositions)) {
+//                    break;
+//                }
+//                page++;
+//                sendBatchPosition(userPositions, pushMessage);
+//            }
+//        } else {
+//            pushService.sendMessage(pushMessage);
+//        }
     }
 
     private void sendFollowed(PushMessage pushMessage) {
