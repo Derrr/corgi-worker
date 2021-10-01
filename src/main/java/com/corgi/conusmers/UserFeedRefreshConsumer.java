@@ -53,6 +53,10 @@ public class UserFeedRefreshConsumer {
         if (corgiFeedService.countUnviewFeed(userId) >= 10) {
             return;
         }
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
+        if (userDetail == null) {
+            return;
+        }
         List<String> blackUserIds = new ArrayList<>();
         List<UserBasic> basicList = corgiBlacklistService.getBlackUser(userId);
         if (!CollectionUtils.isEmpty(basicList)) {
@@ -67,7 +71,6 @@ public class UserFeedRefreshConsumer {
         if (!CollectionUtils.isEmpty(groupList)) {
             groups = String.join("','", groupList);
         }
-        UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
         String city = userDetail.getCity();
         List<CorgiVlog> result = new ArrayList<>();
         result = merge(result, recallNewVlog(userId, city, groups), blackUserIds);
