@@ -93,6 +93,7 @@ public class UserFeedRefreshConsumer {
         for (CorgiVlog vlog : result) {
             corgiFeedService.addFeed(buildFeed(vlog, userId));
         }
+        log.info("add result:{} ", result.size());
     }
 
     private List<CorgiVlog> recallCity(String userId, String city) {

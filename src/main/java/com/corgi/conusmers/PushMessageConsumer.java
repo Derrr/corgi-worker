@@ -89,9 +89,6 @@ public class PushMessageConsumer {
                 for (String userId : userIds) {
                     UserPosition position = corgiUserService.getUserPosition(userId);
                     Double distance = this.getDistance(lat, lng, position);
-                    if (("593".equals(dateId) && "43476".equals(userId)) || ("43476".equals(dateId) && "593".equals(userId))) {
-                        log.info("distance... {} ", distance);
-                    }
                     if (distance != null && distance < 0.05) {
                         this.checkDate(dateId, userId);
                     }
