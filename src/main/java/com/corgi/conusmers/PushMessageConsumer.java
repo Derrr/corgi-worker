@@ -216,7 +216,7 @@ public class PushMessageConsumer {
         List<UserProfile> userProfiles;
         int page = 1;
         int pageSize = 500;
-        String sourceId = pushMessage.getSourceUserId();
+        String sourceId = pushMessage.getTargetUserId();
         while (true) {
             userProfiles = corgiUserFollowService.getFollowedUserByPage(sourceId, 0L, page, pageSize);
             page++;
