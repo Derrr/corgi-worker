@@ -128,6 +128,7 @@ public class PushMessageConsumer {
                 }
             }
         } else if (PushMessage.ACTIVITY.equals(pushMessage.getType())) {
+            log.info("sending activity...");
             sendFollowed(pushMessage);
         } else if (PushMessage.ACTIVITY.concat("_city").equals(pushMessage.getType())) {
             String city = (String) pushMessage.getExtra().get("city");
