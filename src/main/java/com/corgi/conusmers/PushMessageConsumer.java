@@ -128,7 +128,6 @@ public class PushMessageConsumer {
                 }
             }
         } else if (PushMessage.ACTIVITY.equals(pushMessage.getType())) {
-            log.info("sending activity...");
             sendFollowed(pushMessage);
         } else if (PushMessage.ACTIVITY.concat("_city").equals(pushMessage.getType())) {
             String city = (String) pushMessage.getExtra().get("city");
@@ -220,7 +219,6 @@ public class PushMessageConsumer {
         String sourceId = pushMessage.getTargetUserId();
         while (true) {
             userProfiles = corgiUserFollowService.getFollowedUserByPage(sourceId, 0L, page, pageSize);
-            log.info("userProfiles:{} ", userProfiles);
             page++;
             sendBatch(userProfiles, pushMessage);
             if (CollectionUtils.isEmpty(userProfiles) || userProfiles.size() < pageSize) {
