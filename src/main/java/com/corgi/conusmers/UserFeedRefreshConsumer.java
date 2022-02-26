@@ -46,11 +46,14 @@ public class UserFeedRefreshConsumer {
     private CorgiBarService corgiBarService;
     @Reference
     private CorgiActivityService corgiActivityService;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     @RabbitHandler
     public void process(String userId) {
         log.info("start feeding...{} ", userId);
         if (corgiFeedService.countUnviewFeed(userId) >= 10) {
+            cacheManualFeed(userId);
             return;
         }
         UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
@@ -93,7 +96,23 @@ public class UserFeedRefreshConsumer {
         for (CorgiVlog vlog : result) {
             corgiFeedService.addFeed(buildFeed(vlog, userId));
         }
+        cacheManualFeed(userId);
         log.info("add result:{} ", result.size());
+    }
+
+    private void cacheManualFeed(String userId) {
+        CorgiVlog query = new CorgiVlog();
+        query.setUserId(userId);
+        query.setType(CorgiVlogHot.TYPE.MANUAL);
+        query.setStatus("asc");
+        List<CorgiVlog> corgiVlogs = corgiVlogService.recallHotVlog(query, 5);
+        if (!CollectionUtils.isEmpty(corgiVlogs)) {
+            List<String> feeds = new ArrayList<>();
+            for (CorgiVlog vlog : corgiVlogs) {
+                feeds.add(vlog.getActivityId() + "-" + vlog.getUserId());
+            }
+            redisTemplate.opsForList().rightPushAll("manual_feed_" + userId, feeds);
+        }
     }
 
     private List<CorgiVlog> recallCity(String userId, String city) {
