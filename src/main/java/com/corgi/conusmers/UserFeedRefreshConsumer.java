@@ -52,7 +52,9 @@ public class UserFeedRefreshConsumer {
     @RabbitHandler
     public void process(String userId) {
         log.info("start feeding...{} ", userId);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         if (corgiFeedService.countUnviewFeed(userId) >= 10) {
+            cacheUserFeed(userId, sdf);
             cacheManualFeed(userId);
             return;
         }
@@ -67,7 +69,6 @@ public class UserFeedRefreshConsumer {
                 blackUserIds.add(basic.getUserId());
             }
         }
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String ctime = sdf.format(new Date());
         String groups = null;
         List<String> groupList = corgiUserService.getPreferGroup(userId);
@@ -97,7 +98,24 @@ public class UserFeedRefreshConsumer {
             corgiFeedService.addFeed(buildFeed(vlog, userId));
         }
         cacheManualFeed(userId);
+        cacheUserFeed(userId, sdf);
         log.info("add result:{} ", result.size());
+    }
+
+    private void cacheUserFeed(String userId, SimpleDateFormat sdf) {
+        String expire = corgiUserService.getUserVipExpire(userId);
+        if (!StringUtils.isEmpty(expire) && !"-".equals(expire)) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DATE, -3);
+            CorgiVlog query = new CorgiVlog();
+            query.setUserId(userId);
+            query.setCtime(sdf.format(calendar.getTime()));
+            List<CorgiVlog> corgiVlogs = corgiVlogService.recallTargetVlog(userId, query, 1);
+            if (!CollectionUtils.isEmpty(corgiVlogs)) {
+                redisTemplate.opsForValue().set("vip_feed_" + userId, corgiVlogs.get(0).getActivityId(), 1L, TimeUnit.HOURS);
+            }
+        }
+
     }
 
     private void cacheManualFeed(String userId) {
@@ -112,6 +130,7 @@ public class UserFeedRefreshConsumer {
                 feeds.add(vlog.getActivityId() + "-" + vlog.getUserId());
             }
             redisTemplate.opsForList().rightPushAll("manual_feed_" + userId, feeds);
+            redisTemplate.expire("manual_feed_" + userId, 1L, TimeUnit.DAYS);
         }
     }
 
