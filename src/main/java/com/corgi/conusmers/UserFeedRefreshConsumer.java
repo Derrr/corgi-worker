@@ -53,13 +53,13 @@ public class UserFeedRefreshConsumer {
     public void process(String userId) {
         log.info("start feeding...{} ", userId);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        if (corgiFeedService.countUnviewFeed(userId) >= 10) {
-            cacheUserFeed(userId, sdf);
-            cacheManualFeed(userId);
-            return;
-        }
         UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
         if (userDetail == null) {
+            return;
+        }
+        if (corgiFeedService.countUnviewFeed(userId) >= 10) {
+            cacheUserFeed(userDetail, sdf);
+            cacheManualFeed(userId);
             return;
         }
         List<String> blackUserIds = new ArrayList<>();
@@ -98,13 +98,18 @@ public class UserFeedRefreshConsumer {
             corgiFeedService.addFeed(buildFeed(vlog, userId));
         }
         cacheManualFeed(userId);
-        cacheUserFeed(userId, sdf);
+        cacheUserFeed(userDetail, sdf);
         log.info("add result:{} ", result.size());
     }
 
-    private void cacheUserFeed(String userId, SimpleDateFormat sdf) {
-        String expire = corgiUserService.getUserVipExpire(userId);
-        if (!StringUtils.isEmpty(expire) && !"-".equals(expire)) {
+    private void cacheUserFeed(UserDetail detail, SimpleDateFormat sdf) {
+        String userId = detail.getUserId();
+        boolean isVip = "influencer".equals(detail.getAvatarStatus());
+        if (!isVip) {
+            String expire = corgiUserService.getUserVipExpire(userId);
+            isVip = !StringUtils.isEmpty(expire) && !"-".equals(expire);
+        }
+        if (isVip) {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -3);
             CorgiVlog query = new CorgiVlog();
