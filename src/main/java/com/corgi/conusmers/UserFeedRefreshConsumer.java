@@ -77,8 +77,8 @@ public class UserFeedRefreshConsumer {
         }
         String city = userDetail.getCity();
         List<CorgiVlog> result = new ArrayList<>();
-        result = merge(result, recallNewVlog(userId, city, groups), blackUserIds);
-        result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 2, "asc", groups), blackUserIds);
+        //result = merge(result, recallNewVlog(userId, city, groups), blackUserIds);
+        result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 3, "asc", groups), blackUserIds);
         result = merge(result, recallRecommendUser(userId, ctime, 3), blackUserIds);
         result = merge(result, recallCity(userId, city), blackUserIds);
         result = merge(result, recallRecommendVlog(userId, ctime, 10 - result.size(), "like"), blackUserIds);
