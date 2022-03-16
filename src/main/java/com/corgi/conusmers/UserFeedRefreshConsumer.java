@@ -196,6 +196,9 @@ public class UserFeedRefreshConsumer {
             userIds.add(vlog.getUserId());
             vlog.setType("like|");
             results.add(vlog);
+            if (results.size() >= size) {
+                break;
+            }
         }
         if (CollectionUtils.isEmpty(results)) {
             return this.recallRecommendUser(userId, ctime, size);
