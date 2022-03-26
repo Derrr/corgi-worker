@@ -77,9 +77,9 @@ public class UserFeedRefreshConsumer {
         }
         String city = userDetail.getCity();
         List<CorgiVlog> result = new ArrayList<>();
-        //result = merge(result, recallNewVlog(userId, city, groups), blackUserIds);
-        result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 3, "asc", groups), blackUserIds);
-        result = merge(result, recallRecommendUser(userId, ctime, 3), blackUserIds);
+        result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 2, "asc", groups), blackUserIds);
+        result = merge(result, recallRecommendUser(userId, ctime, 2), blackUserIds);
+        result = merge(result, recallFollow(userId, ctime, 2), blackUserIds);
         result = merge(result, recallCity(userId, city), blackUserIds);
         result = merge(result, recallRecommendVlog(userId, ctime, 10 - result.size(), "like"), blackUserIds);
         if (result.size() < 10) {
@@ -206,6 +206,17 @@ public class UserFeedRefreshConsumer {
         return results;
     }
 
+    private List<CorgiVlog> recallFollow(String userId, String ctime, Integer size) {
+
+        CorgiVlog recall = new CorgiVlog();
+        recall.setUserId(userId);
+        List<CorgiVlog> vlogs = corgiVlogService.recallFollowedVlog(recall, size);
+        for (CorgiVlog vlog : vlogs) {
+            vlog.setType("follow|");
+        }
+        return vlogs;
+    }
+
     private List<CorgiVlog> recallRecommendUser(String userId, String ctime, Integer size) {
         List<UserProfile> userProfiles = corgiUserRecommendService.getVlogRecUser(userId, 100);
         List<CorgiVlog> vlogs = new ArrayList<>();
@@ -246,15 +257,9 @@ public class UserFeedRefreshConsumer {
         recall.setUserId(userId);
         recall.setType(type);
         List<CorgiVlog> vlogs = corgiVlogService.recallVlog(recall, size);
-        return vlogs;
-    }
-
-    private List<CorgiVlog> recallNewVlog(String userId, String city, String type) {
-        CorgiVlog recall = new CorgiVlog();
-        recall.setUserId(userId);
-        recall.setType(type);
-        recall.setStatus(city);
-        List<CorgiVlog> vlogs = corgiVlogService.recallVlog(recall, 1);
+        for (CorgiVlog vlog : vlogs) {
+            vlog.setType("new|");
+        }
         return vlogs;
     }
 
