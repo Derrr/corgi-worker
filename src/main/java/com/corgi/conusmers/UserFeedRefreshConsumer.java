@@ -206,16 +206,16 @@ public class UserFeedRefreshConsumer {
         return results;
     }
 
-    private List<CorgiVlog> recallFollow(String userId, String ctime, Integer size) {
+//    private List<CorgiVlog> recallFollow(String userId, String ctime, Integer size) {
 
-        CorgiVlog recall = new CorgiVlog();
-        recall.setUserId(userId);
+//        CorgiVlog recall = new CorgiVlog();
+//        recall.setUserId(userId);
 //        List<CorgiVlog> vlogs = corgiVlogService.recallFollowedVlog(recall, size);
 //        for (CorgiVlog vlog : vlogs) {
 //            vlog.setType("follow|");
 //        }
-        return vlogs;
-    }
+//        return vlogs;
+//    }
 
     private List<CorgiVlog> recallRecommendUser(String userId, String ctime, Integer size) {
         List<UserProfile> userProfiles = corgiUserRecommendService.getVlogRecUser(userId, 100);
