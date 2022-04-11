@@ -79,7 +79,7 @@ public class UserFeedRefreshConsumer {
         List<CorgiVlog> result = new ArrayList<>();
         result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 2, "asc", groups), blackUserIds);
         result = merge(result, recallRecommendUser(userId, ctime, 2), blackUserIds);
-        //result = merge(result, recallFollow(userId, ctime, 2), blackUserIds);
+        result = merge(result, recallFollow(userId, ctime, 2), blackUserIds);
         result = merge(result, recallCity(userId, city), blackUserIds);
         result = merge(result, recallRecommendVlog(userId, ctime, 10 - result.size(), "like"), blackUserIds);
         if (result.size() < 10) {
@@ -206,16 +206,16 @@ public class UserFeedRefreshConsumer {
         return results;
     }
 
-//    private List<CorgiVlog> recallFollow(String userId, String ctime, Integer size) {
+    private List<CorgiVlog> recallFollow(String userId, String ctime, Integer size) {
 
-//        CorgiVlog recall = new CorgiVlog();
-//        recall.setUserId(userId);
-//        List<CorgiVlog> vlogs = corgiVlogService.recallFollowedVlog(recall, size);
-//        for (CorgiVlog vlog : vlogs) {
-//            vlog.setType("follow|");
-//        }
-//        return vlogs;
-//    }
+        CorgiVlog recall = new CorgiVlog();
+        recall.setUserId(userId);
+        List<CorgiVlog> vlogs = corgiVlogService.recallFollowedVlog(recall, size);
+        for (CorgiVlog vlog : vlogs) {
+            vlog.setType("follow|");
+        }
+        return vlogs;
+    }
 
     private List<CorgiVlog> recallRecommendUser(String userId, String ctime, Integer size) {
         List<UserProfile> userProfiles = corgiUserRecommendService.getVlogRecUser(userId, 100);
