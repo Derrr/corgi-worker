@@ -2,16 +2,10 @@ package com.corgi.conusmers;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.activity.api.CorgiActivityService;
-import com.corgi.activity.entity.CorgiActivity;
-import com.corgi.common.CorgiConstants;
 import com.corgi.common.CorgiQueueName;
-import com.corgi.common.messages.MatchRefresher;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
-import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +73,7 @@ public class UserFeedRefreshConsumer {
         List<CorgiVlog> result = new ArrayList<>();
         result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 2, "asc", groups), blackUserIds);
         result = merge(result, recallRecommendUser(userId, ctime, 2), blackUserIds);
-        //result = merge(result, recallFollow(userId, ctime, 2), blackUserIds);
+        result = merge(result, recallFollow(userId, ctime, 1), blackUserIds);
         result = merge(result, recallCity(userId, city), blackUserIds);
         result = merge(result, recallRecommendVlog(userId, ctime, 10 - result.size(), "like"), blackUserIds);
         if (result.size() < 10) {
@@ -206,16 +200,16 @@ public class UserFeedRefreshConsumer {
         return results;
     }
 
-//    private List<CorgiVlog> recallFollow(String userId, String ctime, Integer size) {
+    private List<CorgiVlog> recallFollow(String userId, String ctime, Integer size) {
 
-//        CorgiVlog recall = new CorgiVlog();
-//        recall.setUserId(userId);
-//        List<CorgiVlog> vlogs = corgiVlogService.recallFollowedVlog(recall, size);
-//        for (CorgiVlog vlog : vlogs) {
-//            vlog.setType("follow|");
-//        }
-//        return vlogs;
-//    }
+        CorgiVlog recall = new CorgiVlog();
+        recall.setUserId(userId);
+        List<CorgiVlog> vlogs = corgiVlogService.recallFollowedVlog(recall, size);
+        for (CorgiVlog vlog : vlogs) {
+            vlog.setType("follow|");
+        }
+        return vlogs;
+    }
 
     private List<CorgiVlog> recallRecommendUser(String userId, String ctime, Integer size) {
         List<UserProfile> userProfiles = corgiUserRecommendService.getVlogRecUser(userId, 100);
