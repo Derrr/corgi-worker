@@ -59,6 +59,7 @@ public class ActivityPostConsumer {
         }
         if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
             this.onHot(activity, lockKey);
+            return;
         }
         if ("influencer".equals(userDetail.getAvatarStatus())) {
             this.onHot(activity, lockKey);
