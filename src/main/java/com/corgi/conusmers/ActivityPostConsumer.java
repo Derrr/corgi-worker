@@ -57,13 +57,16 @@ public class ActivityPostConsumer {
         if (userDetail == null) {
             return;
         }
-//        if ("influencer".equals(userDetail.getAvatarStatus())) {
-//            this.onHot(activity, lockKey);
-//            return;
-//        }
+        if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
+            this.onHot(activity, lockKey);
+        }
+        if ("influencer".equals(userDetail.getAvatarStatus())) {
+            this.onHot(activity, lockKey);
+            return;
+        }
         String activityId = activity.getId();
         ActivityQuery query = new ActivityQuery();
-        query.setPageSize(100);
+        query.setPageSize(300);
         query.setUserId(activity.getUserId());
         List<CorgiActivity> corgiActivities = corgiActivityService.getFeedActivity(query);
         if (CollectionUtils.isEmpty(corgiActivities)) {
@@ -81,7 +84,7 @@ public class ActivityPostConsumer {
                     max = likes;
                 }
             }
-            if (max >= 50 || total / count > 5) {
+            if (max >= 50 || total / count > 5 || count <= 1) {
                 this.onHot(activity, lockKey);
             }
         }
