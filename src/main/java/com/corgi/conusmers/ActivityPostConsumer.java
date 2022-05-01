@@ -22,9 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -102,7 +100,7 @@ public class ActivityPostConsumer {
         corgiVlogHot.setExpectView(3000);
         corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
         corgiVlogService.addHotVlog(corgiVlogHot);
-        corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
+        //corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
     }
 
 }
