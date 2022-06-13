@@ -83,6 +83,7 @@ public class PushService {
         }
         String url = HOST + orgName + "/" + appName + MESSAGE_URL;
         HashMap message = new HashMap();
+        message.put("title", "Corgi");
         if (pushMessage.getSourceUserId() != null && pushMessage.getSourceUserId().contains(HELPER)) {
             message.put("from", pushMessage.getSourceUserId());
         }
@@ -102,8 +103,8 @@ public class PushService {
         message.put("ext", extra);
         Boolean isIgnore = (Boolean) extra.get("em_ignore_notification");
         if (isIgnore != null && isIgnore) {
-            HashMap<String,Object> apns = new HashMap<>();
-            message.put("apns",apns);
+            HashMap<String, Object> apns = new HashMap<>();
+            message.put("apns", apns);
         }
         try {
             String accessToken = getToken();
