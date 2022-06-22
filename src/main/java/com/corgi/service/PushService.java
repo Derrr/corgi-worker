@@ -95,7 +95,7 @@ public class PushService {
             HashMap apnsContent = new HashMap();
             apnsContent.put("em_push_content", new String(pushMessage.getMessage().getBytes(), "UTF-8"));
             extra.put("em_apns_ext", apnsContent);
-            //msg.put("msg", new String(pushMessage.getMessage().getBytes(), "UTF-8"));
+            msg.put("msg", new String(pushMessage.getMessage().getBytes(), "UTF-8"));
             message.put("content", new String(pushMessage.getMessage().getBytes(), "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             log.error(e.getMessage(), e);
