@@ -94,6 +94,7 @@ public class PushService {
         try {
             HashMap apnsContent = new HashMap();
             apnsContent.put("em_push_content", new String(pushMessage.getMessage().getBytes(), "UTF-8"));
+            apnsContent.put("em_alert_title", new String("Corgi".getBytes(), "UTF-8"));
             extra.put("em_apns_ext", apnsContent);
             msg.put("msg", new String(pushMessage.getMessage().getBytes(), "UTF-8"));
             message.put("content", new String(pushMessage.getMessage().getBytes(), "UTF-8"));
