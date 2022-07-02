@@ -73,7 +73,7 @@ public class PushRegisterConsumer {
 //            }
 //        }
         pushMessage.setSourceUserId(PushService.CORGI_HELPER);
-        pushMessage.setMessage("1分钟解锁Corgi流量密码！「新手必看」");
+        pushMessage.setMessage("CORGI全新攻略");
         HashMap<String, Object> extra = new HashMap<>();
         extra.put("type", "905");
 //        JSONArray content = new JSONArray();
@@ -82,11 +82,11 @@ public class PushRegisterConsumer {
 //        content.add(new JSONObject().fluentPut("text", " 注册Corgi啦，快来看看是不是你的菜。"));
 //        content.add(new JSONObject().fluentPut("text", " 看看他>>").fluentPut("url", detail.getUserId()).fluentPut("urlType", "4"));
 //        extra.put("content", "如何获得更多流量推荐？如何可以上corgi封面？天菜创始人又是什么？点击查看详情攻略。");
-        extra.put("title", "1分钟解锁Corgi流量密码！「新手必看」");
-        extra.put("desc", "如何获得更多流量推荐？如何可以上corgi封面？天菜创始人又是什么？点击查看详情攻略。");
-        extra.put("picUrl", "https://corgi-pic.oss-cn-beijing.aliyuncs.com/corgi/newer.jpeg");
+        extra.put("title", "CORGI全新攻略");
+        extra.put("desc", "不管你是小白还是大佬，快来看看CORGI乐园全新游玩攻略手册");
+        extra.put("picUrl", "http://corgi-pic.oss-cn-beijing.aliyuncs.com/shop/MTY1NjM5NjMzNTAwMA%3D%3D");
         extra.put("urlType", "1");
-        extra.put("url", "https://www.corgi.org.cn/html/wechat/html2user/index.html");
+        extra.put("url", "https://www.corgi.org.cn/html/wechat/newusers/html/guideline_v02.html");
         pushMessage.setExtra(extra);
         pushService.sendMessage(pushMessage, Arrays.asList(userId));
 //        if (resultIds.size() > 0) {
