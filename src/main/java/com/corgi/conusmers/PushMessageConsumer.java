@@ -79,7 +79,7 @@ public class PushMessageConsumer {
                 pushService.sendMessage(pushMessage);
             }
         } else if (PushMessage.MATCH.equals(pushMessage.getType())) {
-            this.checkMet(pushMessage);
+            //this.checkMet(pushMessage);
             List<String> userIds = getUserProfileList(pushMessage);
             String dateId = pushMessage.getSourceUserId();
             HashMap extra = pushMessage.getExtra();
