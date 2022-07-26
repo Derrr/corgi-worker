@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Slf4j
-@RabbitListener(queues = CorgiQueueName.PUSH_MESSAGE_QUEUE)
+@RabbitListener(queues = CorgiQueueName.PUSH_MESSAGE_QUEUE,containerFactory = "pushMessageFactory")
 public class PushMessageConsumer {
     public static Double EARTH_RADIUS = 6371.393;
 

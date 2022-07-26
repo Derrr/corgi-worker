@@ -3,9 +3,12 @@ package com.corgi;
 import com.alibaba.dubbo.spring.boot.annotation.EnableDubboConfiguration;
 import com.corgi.common.CorgiQueueName;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -87,5 +90,14 @@ public class CorgiWorkerApplication {
     @Bean
     public Queue silentPushQueue() {
         return new Queue(CorgiQueueName.SILENT_PUSH_QUEUE);
+    }
+
+    @Bean("pushMessageFactory")
+    public SimpleRabbitListenerContainerFactory pushMessageFactory(SimpleRabbitListenerContainerFactoryConfigurer configurer, ConnectionFactory connectionFactory) {
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        factory.setPrefetchCount(1);
+        factory.setConcurrentConsumers(5);
+        configurer.configure(factory, connectionFactory);
+        return factory;
     }
 }
