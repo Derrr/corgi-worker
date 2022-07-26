@@ -96,7 +96,7 @@ public class CorgiWorkerApplication {
     public SimpleRabbitListenerContainerFactory pushMessageFactory(SimpleRabbitListenerContainerFactoryConfigurer configurer, ConnectionFactory connectionFactory) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setPrefetchCount(1);
-        factory.setConcurrentConsumers(5);
+        factory.setConcurrentConsumers(1);
         configurer.configure(factory, connectionFactory);
         return factory;
     }
