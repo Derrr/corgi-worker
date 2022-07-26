@@ -201,6 +201,7 @@ public class PushMessageConsumer {
         } else {
             pushService.sendMessage(pushMessage);
         }
+        log.info("received message: end");
     }
 
     private void sendFollowedCity(PushMessage pushMessage, String city) {
