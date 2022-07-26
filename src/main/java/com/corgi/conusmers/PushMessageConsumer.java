@@ -368,11 +368,11 @@ public class PushMessageConsumer {
     private List<String> getUserProfileList(PushMessage pushMessage) {
         HashMap extra = pushMessage.getExtra();
         Double lat = Double.valueOf(extra.get("lat").toString());
-        if (lat > 90) {
+        if (lat > 90 || lat == 0.0) {
             return new ArrayList<>();
         }
         Double lng = Double.valueOf(extra.get("lng").toString());
-        if (lng > 200) {
+        if (lng > 200 || lat == 0.0) {
             return new ArrayList<>();
         }
         UserQuery userQuery = new UserQuery();
