@@ -85,22 +85,13 @@ public class PushMessageConsumer {
                 return;
             }
             List<String> userIds = getUserProfileList(pushMessage);
-            String dateId = pushMessage.getSourceUserId();
-            HashMap extra = pushMessage.getExtra();
-            Double lat = Double.valueOf(extra.get("lat").toString());
-            Double lng = Double.valueOf(extra.get("lng").toString());
             if (CollectionUtils.isNotEmpty(userIds)) {
                 for (String userId : userIds) {
-                    UserPosition position = corgiUserService.getUserPosition(userId);
-                    Double distance = this.getDistance(lat, lng, position);
                     if (StringUtils.isEmpty(userId)) {
                         continue;
                     }
                     if (userId.equals(pushMessage.getSourceUserId())) {
                         continue;
-                    }
-                    if (distance != null && distance < 0.05) {
-                        this.checkDate(dateId, userId);
                     }
                     String key = "match90sent_" + pushMessage.getSourceUserId() + "_" + userId;
                     String userKey = "match90sentUser_" + userId;
