@@ -81,7 +81,7 @@ public class PushMessageConsumer {
         } else if (PushMessage.MATCH.equals(pushMessage.getType())) {
             //this.checkMet(pushMessage);
             String personKey = "match90sentLogin_" + pushMessage.getSourceUserId();
-            if (!redisTemplate.opsForValue().setIfAbsent(personKey, System.currentTimeMillis() + "", 1L, TimeUnit.HOURS)) {
+            if (!redisTemplate.opsForValue().setIfAbsent(personKey, System.currentTimeMillis() + "", 10L, TimeUnit.MINUTES)) {
                 return;
             }
             List<String> userIds = getUserProfileList(pushMessage);
