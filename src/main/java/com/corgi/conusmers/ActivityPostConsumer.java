@@ -93,7 +93,7 @@ public class ActivityPostConsumer {
     }
 
     private void onHot(CorgiActivity activity, String lockKey) {
-        if (!redisTemplate.opsForValue().setIfAbsent(lockKey, System.currentTimeMillis() + "", 12L, TimeUnit.HOURS)) {
+        if (!redisTemplate.opsForValue().setIfAbsent(lockKey, System.currentTimeMillis() + "", 24L, TimeUnit.HOURS)) {
             return;
         }
         CorgiVlogHot corgiVlogHot = new CorgiVlogHot();
