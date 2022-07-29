@@ -47,49 +47,49 @@ public class ActivityPostConsumer {
 
     @RabbitHandler
     public void process(CorgiActivity activity) {
-//        String lockKey = "on_hot-" + activity.getUserId();
-//        if (redisTemplate.hasKey(lockKey)) {
-//            return;
-//        }
-//        if (CorgiActivity.CAT_TEXT.equals(activity.getCategory())) {
-//            return;
-//        }
-//        UserDetail userDetail = corgiUserService.getUserDetailBasic(activity.getUserId());
-//        if (userDetail == null) {
-//            return;
-//        }
+        String lockKey = "on_hot-" + activity.getUserId();
+        if (redisTemplate.hasKey(lockKey)) {
+            return;
+        }
+        if (CorgiActivity.CAT_TEXT.equals(activity.getCategory())) {
+            return;
+        }
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(activity.getUserId());
+        if (userDetail == null) {
+            return;
+        }
 //        if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
 //            this.onHot(activity, lockKey);
 //            return;
 //        }
-//        if ("influencer".equals(userDetail.getAvatarStatus())) {
-//            this.onHot(activity, lockKey);
-//            return;
-//        }
-//        String activityId = activity.getId();
-//        ActivityQuery query = new ActivityQuery();
-//        query.setPageSize(300);
-//        query.setUserId(activity.getUserId());
-//        List<CorgiActivity> corgiActivities = corgiActivityService.getFeedActivity(query);
-//        if (CollectionUtils.isEmpty(corgiActivities)) {
-//            double total = 0.0;
-//            int count = 0;
-//            int max = 0;
-//            for (CorgiActivity activity1 : corgiActivities) {
-//                if (activityId.equals(activity1.getId())) {
-//                    continue;
-//                }
-//                count++;
-//                Integer likes = corgiLikeService.countRealActivityLike(activity1.getId());
-//                total += likes;
-//                if (likes > max) {
-//                    max = likes;
-//                }
-//            }
-//            if (max >= 50 || total / count > 5 || count <= 1) {
-//                this.onHot(activity, lockKey);
-//            }
-//        }
+        if ("influencer".equals(userDetail.getAvatarStatus())) {
+            this.onHot(activity, lockKey);
+            return;
+        }
+        String activityId = activity.getId();
+        ActivityQuery query = new ActivityQuery();
+        query.setPageSize(300);
+        query.setUserId(activity.getUserId());
+        List<CorgiActivity> corgiActivities = corgiActivityService.getFeedActivity(query);
+        if (CollectionUtils.isEmpty(corgiActivities)) {
+            double total = 0.0;
+            int count = 0;
+            int max = 0;
+            for (CorgiActivity activity1 : corgiActivities) {
+                if (activityId.equals(activity1.getId())) {
+                    continue;
+                }
+                count++;
+                Integer likes = corgiLikeService.countRealActivityLike(activity1.getId());
+                total += likes;
+                if (likes > max) {
+                    max = likes;
+                }
+            }
+            if (max >= 50 || total / count > 5) {
+                this.onHot(activity, lockKey);
+            }
+        }
     }
 
     private void onHot(CorgiActivity activity, String lockKey) {
