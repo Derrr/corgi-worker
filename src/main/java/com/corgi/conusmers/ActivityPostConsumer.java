@@ -68,7 +68,7 @@ public class ActivityPostConsumer {
         }
         String activityId = activity.getId();
         ActivityQuery query = new ActivityQuery();
-        query.setPageSize(300);
+        query.setPageSize(10);
         query.setUserId(activity.getUserId());
         List<CorgiActivity> corgiActivities = corgiActivityService.getFeedActivity(query);
         if (CollectionUtils.isEmpty(corgiActivities)) {
