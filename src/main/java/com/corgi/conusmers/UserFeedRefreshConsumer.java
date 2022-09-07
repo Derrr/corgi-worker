@@ -56,13 +56,7 @@ public class UserFeedRefreshConsumer {
             cacheManualFeed(userId);
             return;
         }
-        List<String> blackUserIds = new ArrayList<>();
-        List<UserBasic> basicList = corgiBlacklistService.getBlackUser(userId);
-        if (!CollectionUtils.isEmpty(basicList)) {
-            for (UserBasic basic : basicList) {
-                blackUserIds.add(basic.getUserId());
-            }
-        }
+        List<String> blackUserIds = this.getBlackIds(userId);
         String ctime = sdf.format(new Date());
         String groups = null;
         List<String> groupList = corgiUserService.getPreferGroup(userId);
@@ -116,6 +110,36 @@ public class UserFeedRefreshConsumer {
         }
 
     }
+
+    private List<String> getBlackIds(String userId) {
+        String blackKey = "black_cache_" + userId;
+        List<String> blackUserIds = new ArrayList<>();
+        if (!redisTemplate.hasKey(blackKey)) {
+            List<UserBasic> basicList = corgiBlacklistService.getBlackUser(userId);
+            if (!CollectionUtils.isEmpty(basicList)) {
+                for (UserBasic basic : basicList) {
+                    blackUserIds.add(basic.getUserId());
+                }
+            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DATE, -30);
+            blackUserIds.addAll(corgiBlacklistService.getUninterestedCreator(userId, new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime())));
+            if (CollectionUtils.isEmpty(blackUserIds)) {
+                redisTemplate.delete(blackKey);
+                redisTemplate.opsForList().leftPush(blackKey, "null");
+            } else {
+                redisTemplate.opsForList().leftPushAll(blackKey, blackUserIds);
+            }
+            redisTemplate.expire(blackKey, 1L, TimeUnit.DAYS);
+        } else {
+            blackUserIds = redisTemplate.opsForList().range(blackKey, 0, -1);
+            if (blackUserIds.size() == 1 && "null".equals(blackUserIds.get(0))) {
+                return new ArrayList<>();
+            }
+        }
+        return blackUserIds;
+    }
+
 
     private void cacheManualFeed(String userId) {
         CorgiVlog query = new CorgiVlog();
