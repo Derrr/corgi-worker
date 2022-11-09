@@ -70,13 +70,13 @@ public class UserFeedRefreshConsumer {
         result = merge(result, recallFollow(userId, ctime, 1), blackUserIds);
         result = merge(result, recallCity(userId, city), blackUserIds);
         result = merge(result, recallRecommendVlog(userId, ctime, 10 - result.size(), "like"), blackUserIds);
-        if (result.size() < 10) {
+        if (result.size() < 10 && !CollectionUtils.isEmpty(groupList)) {
             result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 10 - result.size(), "desc", groups), blackUserIds);
         }
         if (result.size() < 10) {
             result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 10 - result.size(), "desc", ""), blackUserIds);
         }
-        if (result.size() < 5) {
+        if (result.size() < 5 && !CollectionUtils.isEmpty(groupList)) {
             result = merge(result, recallNewVlogBySize(userId, groups, 5 - result.size()), blackUserIds);
         }
         if (result.size() < 5) {
