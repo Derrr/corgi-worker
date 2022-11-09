@@ -178,7 +178,6 @@ public class UserFeedRefreshConsumer {
 
     private List<CorgiVlog> recallHotVlog(String userId, String ctime, String type, Integer size, String orderby, String groups) {
         CorgiVlog recall = new CorgiVlog();
-        recall.setCtime(ctime);
         recall.setActivityId(groups);
         recall.setUserId(userId);
         recall.setType(type);
