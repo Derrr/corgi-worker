@@ -44,6 +44,8 @@ public class ActivityPostConsumer {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    private final List<String> WHITE_LIST = Arrays.asList("744758", "521198", "600670", "528454");
+
 
     @RabbitHandler
     public void process(CorgiActivity activity) {
@@ -58,10 +60,10 @@ public class ActivityPostConsumer {
         if (userDetail == null) {
             return;
         }
-//        if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
-//            this.onHot(activity, lockKey);
-//            return;
-//        }
+        if (WHITE_LIST.contains(activity.getUserId())) {
+            this.onHot(activity, lockKey);
+            return;
+        }
         if ("influencer".equals(userDetail.getAvatarStatus())) {
             this.onHot(activity, lockKey);
             return;
@@ -93,7 +95,7 @@ public class ActivityPostConsumer {
     }
 
     private void onHot(CorgiActivity activity, String lockKey) {
-        if (!redisTemplate.opsForValue().setIfAbsent(lockKey, System.currentTimeMillis() + "", 24L, TimeUnit.HOURS)) {
+        if (!redisTemplate.opsForValue().setIfAbsent(lockKey, System.currentTimeMillis() + "", 20L, TimeUnit.HOURS)) {
             return;
         }
         CorgiVlogHot corgiVlogHot = new CorgiVlogHot();
