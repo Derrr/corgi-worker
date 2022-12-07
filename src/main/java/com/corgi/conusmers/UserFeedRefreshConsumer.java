@@ -40,6 +40,8 @@ public class UserFeedRefreshConsumer {
     private CorgiBarService corgiBarService;
     @Reference
     private CorgiActivityService corgiActivityService;
+    @Reference
+    private CorgiToolService corgiToolService;
     @Autowired
     private StringRedisTemplate redisTemplate;
 
@@ -63,12 +65,23 @@ public class UserFeedRefreshConsumer {
         if (!CollectionUtils.isEmpty(groupList)) {
             groups = String.join("','", groupList);
         }
-        String city = userDetail.getCity();
+        String topic = "";
+        try {
+            List<String> topics = redisTemplate.opsForList().range("corgi_topics", 0, -1);
+            if (CollectionUtils.isEmpty(topics)) {
+                topics = corgiToolService.searchTopic(null, "release").stream().map(t -> t.getTopicId()).collect(Collectors.toList());
+            }
+            Integer index = new Random().nextInt(topics.size());
+            topic = topics.get(index);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
         List<CorgiVlog> result = new ArrayList<>();
         result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 2, "asc", groups), blackUserIds);
-        result = merge(result, recallRecommendUser(userId, ctime, 2), blackUserIds);
+        result = merge(result, recallRecommendUser(userId, ctime, 1), blackUserIds);
         result = merge(result, recallFollow(userId, ctime, 1), blackUserIds);
-        result = merge(result, recallCity(userId, city), blackUserIds);
+        result = merge(result, recallTopic(userId, topic), blackUserIds);
         result = merge(result, recallRecommendVlog(userId, ctime, 10 - result.size(), "like"), blackUserIds);
         if (result.size() < 10 && !CollectionUtils.isEmpty(groupList)) {
             result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 10 - result.size(), "desc", groups), blackUserIds);
@@ -157,21 +170,13 @@ public class UserFeedRefreshConsumer {
         }
     }
 
-    private List<CorgiVlog> recallCity(String userId, String city) {
-        if (StringUtils.isEmpty(city)) {
-            return new ArrayList<>();
-        }
-        List<String> barIds = corgiBarService.getBarListByCity(city, null, null)
-                .stream().map(bar -> bar.getBarId()).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(barIds)) {
-            return new ArrayList<>();
-        }
-        CorgiVlog recall = new CorgiVlog();
+    private List<CorgiVlog> recallTopic(String userId, String topic) {
+        TopicBillboard recall = new TopicBillboard();
         recall.setUserId(userId);
-        recall.setType("id");
-        List<CorgiVlog> vlogList = corgiVlogService.recallTargetVlog(String.join("','", barIds), recall, 1);
+        recall.setTopic(topic);
+        List<CorgiVlog> vlogList = corgiVlogService.recallBillboardVlog(recall, 1);
         for (CorgiVlog vlog : vlogList) {
-            vlog.setType("bar|");
+            vlog.setType("topic|");
         }
         return vlogList;
     }
