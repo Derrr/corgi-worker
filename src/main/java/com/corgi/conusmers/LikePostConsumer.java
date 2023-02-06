@@ -46,12 +46,12 @@ public class LikePostConsumer {
 
     @RabbitHandler
     public void process(ActivityLike activityLike) {
+        log.info("post like:{} ", activityLike.getActivityId());
         ActivityQuery query = new ActivityQuery();
         query.setUserId(activityLike.getUserId());
         query.setActivityId(activityLike.getActivityId());
         query.setSort("asc");
         query.setPageSize(1);
-
 
         Integer likeCount = corgiLikeService.countRealActivityLike(activityLike.getActivityId());
         if (likeCount >= 10) {
@@ -83,6 +83,7 @@ public class LikePostConsumer {
         }
         Integer expectView = new Double(Math.pow(likeCount, 1.5) * 10 + 3000).intValue();
         Integer realLikeCount = corgiLikeService.countRealActivityLike(activityId);
+        log.info("post like expect:{} real:{} ", expectView, realLikeCount);
         if (hot.getId() == null) {
             CorgiVlogHot addHot = new CorgiVlogHot();
             addHot.setActivityId(hot.getActivityId());
