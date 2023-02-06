@@ -60,10 +60,10 @@ public class ActivityPostConsumer {
         if (userDetail == null) {
             return;
         }
-        if (WHITE_LIST.contains(activity.getUserId())) {
-            this.onHot(activity, lockKey);
-            return;
-        }
+//        if (WHITE_LIST.contains(activity.getUserId())) {
+//            this.onHot(activity, lockKey);
+//            return;
+//        }
         if ("influencer".equals(userDetail.getAvatarStatus())) {
             this.onHot(activity, lockKey);
             return;
