@@ -81,7 +81,7 @@ public class LikePostConsumer {
         if (tmpList.size() > 0) {
             hot = tmpList.get(0);
         }
-        Integer expectView = new Double(Math.pow(likeCount, 1.5) * 10 + likeCount * 100).intValue();
+        Integer expectView = new Double(Math.pow(likeCount, 1.5) * 10 + 3000).intValue();
         Integer realLikeCount = corgiLikeService.countRealActivityLike(activityId);
         if (hot.getId() == null) {
             CorgiVlogHot addHot = new CorgiVlogHot();
