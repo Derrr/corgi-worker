@@ -84,8 +84,7 @@ public class LikePostConsumer {
         if (tmpList.size() > 0) {
             hot = tmpList.get(0);
         }
-        Integer expectView = new Double(Math.pow(likeCount, 1.5) * 10 + 500).intValue();
-        log.info("like post expectView:{} ", expectView);
+        Integer expectView = new Double(Math.pow(likeCount, 1.5) * 10 + likeCount * 100).intValue();
         Integer realLikeCount = corgiLikeService.countRealActivityLike(activityId);
         log.info("like post realCount:{} ", realLikeCount);
         if (hot.getId() == null) {
