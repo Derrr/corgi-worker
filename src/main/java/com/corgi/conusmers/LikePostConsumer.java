@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Slf4j
-@RabbitListener(queues = CorgiQueueName.ACTIVITY_POST_QUEUE)
+@RabbitListener(queues = CorgiQueueName.LIKE_POST_QUEUE)
 public class LikePostConsumer {
     @Reference
     private CorgiLikeService corgiLikeService;
