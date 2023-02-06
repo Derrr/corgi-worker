@@ -46,6 +46,7 @@ public class LikePostConsumer {
 
     @RabbitHandler
     public void process(ActivityLike activityLike) {
+        log.info("like post init:{} ", activityLike.getActivityId());
         ActivityQuery query = new ActivityQuery();
         query.setUserId(activityLike.getUserId());
         query.setActivityId(activityLike.getActivityId());
@@ -54,6 +55,7 @@ public class LikePostConsumer {
 
 
         Integer likeCount = corgiLikeService.countRealActivityLike(activityLike.getActivityId());
+        log.info("like post likeCount:{} ", activityLike.getActivityId());
         if (likeCount >= 10) {
             List<String> preActivityId = corgiUserActivityService.searchFeedActivity(query);
             this.addHot(preActivityId, likeCount * 0.8);
@@ -70,6 +72,7 @@ public class LikePostConsumer {
             return;
         }
         String activityId = activityIds.get(0);
+        log.info("like post aroundActivity:{} ", activityId);
         CorgiVlogHot hot = new CorgiVlogHot();
         hot.setActivityId(activityId);
 
@@ -82,7 +85,9 @@ public class LikePostConsumer {
             hot = tmpList.get(0);
         }
         Integer expectView = new Double(Math.pow(likeCount, 1.5) * 10 + 500).intValue();
+        log.info("like post expectView:{} ", expectView);
         Integer realLikeCount = corgiLikeService.countRealActivityLike(activityId);
+        log.info("like post realCount:{} ", realLikeCount);
         if (hot.getId() == null) {
             CorgiVlogHot addHot = new CorgiVlogHot();
             addHot.setActivityId(hot.getActivityId());
