@@ -41,8 +41,6 @@ public class ActivityPostConsumer {
     @Reference
     private CorgiActivityService corgiActivityService;
     @Reference
-    private CorgiActivityFeedService corgiActivityFeedService;
-    @Reference
     private CorgiUserService corgiUserService;
     @Autowired
     private StringRedisTemplate redisTemplate;
@@ -84,15 +82,6 @@ public class ActivityPostConsumer {
                 if (activityId.equals(activity1.getId())) {
                     continue;
                 }
-//                if(activity1.getCheckStatus().equals("fail")){
-//                    continue;
-//                }
-//                if(activity1.getCheckStatus().equals("check")){
-//                    continue;
-//                }
-//                if(activity1.getStatus().equals("deleted")){
-//                    continue;
-//                }
                 count++;
                 Integer likes = corgiLikeService.countRealActivityLike(activity1.getId());
                 total += likes;
