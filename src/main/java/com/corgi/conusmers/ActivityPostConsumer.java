@@ -75,7 +75,7 @@ public class ActivityPostConsumer {
         ActivityQuery query = new ActivityQuery();
         query.setPageSize(100);
         query.setUserId(activity.getUserId());
-        List<CorgiActivity> corgiActivities = corgiActivityFeedService.queryActivityFeed(query);
+        List<CorgiActivity> corgiActivities = corgiActivityService.getFeedActivity(query);
         if (CollectionUtils.isEmpty(corgiActivities)) {
             double total = 0.0;
             int count = 0;
@@ -84,15 +84,15 @@ public class ActivityPostConsumer {
                 if (activityId.equals(activity1.getId())) {
                     continue;
                 }
-                if(activity1.getCheckStatus().equals("fail")){
-                    continue;
-                }
-                if(activity1.getCheckStatus().equals("check")){
-                    continue;
-                }
-                if(activity1.getStatus().equals("deleted")){
-                    continue;
-                }
+//                if(activity1.getCheckStatus().equals("fail")){
+//                    continue;
+//                }
+//                if(activity1.getCheckStatus().equals("check")){
+//                    continue;
+//                }
+//                if(activity1.getStatus().equals("deleted")){
+//                    continue;
+//                }
                 count++;
                 Integer likes = corgiLikeService.countRealActivityLike(activity1.getId());
                 total += likes;
