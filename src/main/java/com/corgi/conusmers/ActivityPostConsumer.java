@@ -1,6 +1,7 @@
 package com.corgi.conusmers;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.corgi.activity.api.CorgiActivityFeedService;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiQueueName;
@@ -40,6 +41,8 @@ public class ActivityPostConsumer {
     @Reference
     private CorgiActivityService corgiActivityService;
     @Reference
+    private CorgiActivityFeedService corgiActivityFeedService;
+    @Reference
     private CorgiUserService corgiUserService;
     @Autowired
     private StringRedisTemplate redisTemplate;
@@ -72,13 +75,22 @@ public class ActivityPostConsumer {
         ActivityQuery query = new ActivityQuery();
         query.setPageSize(100);
         query.setUserId(activity.getUserId());
-        List<CorgiActivity> corgiActivities = corgiActivityService.getFeedActivity(query);
+        List<CorgiActivity> corgiActivities = corgiActivityFeedService.queryActivityFeed(query);
         if (CollectionUtils.isEmpty(corgiActivities)) {
             double total = 0.0;
             int count = 0;
             int max = 0;
             for (CorgiActivity activity1 : corgiActivities) {
                 if (activityId.equals(activity1.getId())) {
+                    continue;
+                }
+                if(activity1.getCheckStatus().equals("fail")){
+                    continue;
+                }
+                if(activity1.getCheckStatus().equals("check")){
+                    continue;
+                }
+                if(activity1.getStatus().equals("deleted")){
                     continue;
                 }
                 count++;
