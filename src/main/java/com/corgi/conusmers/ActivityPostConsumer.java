@@ -105,7 +105,7 @@ public class ActivityPostConsumer {
         corgiVlogHot.setViewCount(null);
         corgiVlogHot.setLikeCount(0);
         corgiVlogHot.setActivityId(activity.getId());
-        corgiVlogHot.setExpectView(1000);
+        corgiVlogHot.setExpectView(500);
         corgiVlogHot.setType(CorgiVlogHot.TYPE.AUTO);
         corgiVlogService.addHotVlog(corgiVlogHot);
         //corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
