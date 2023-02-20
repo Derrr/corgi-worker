@@ -80,7 +80,7 @@ public class ActivityPostConsumer {
         query.setUserId(activity.getUserId());
         List<CorgiActivity> corgiActivities = corgiActivityService.getFeedActivity(query);
         log.info("into post size {}", corgiActivities.size());
-        if (CollectionUtils.isEmpty(corgiActivities)) {
+        if (!CollectionUtils.isEmpty(corgiActivities)) {
             double total = 0.0;
             int count = 0;
             int max = 0;
