@@ -89,11 +89,26 @@ public class ActivityPostConsumer {
                     max = likes;
                 }
             }
-            log.info("userID:{} max:{} total:{} count:{} avg:{}", activity.getUserId(), max, total, count, total / count);
             if (max >= 50 || total / count > 5) {
                 this.onHot(activity, lockKey);
             }
+        } else {
+            this.preHot(activity, lockKey);
         }
+    }
+
+    private void preHot(CorgiActivity activity, String lockKey) {
+        if (!redisTemplate.opsForValue().setIfAbsent(lockKey, System.currentTimeMillis() + "", 10L, TimeUnit.MINUTES)) {
+            return;
+        }
+        CorgiVlogHot corgiVlogHot = new CorgiVlogHot();
+        corgiVlogHot.setViewCount(null);
+        corgiVlogHot.setLikeCount(0);
+        corgiVlogHot.setActivityId(activity.getId());
+        corgiVlogHot.setExpectView(1000);
+        corgiVlogHot.setType(CorgiVlogHot.TYPE.AUTO);
+        corgiVlogService.addHotVlog(corgiVlogHot);
+        //corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
     }
 
     private void onHot(CorgiActivity activity, String lockKey) {
