@@ -50,17 +50,21 @@ public class ActivityPostConsumer {
 
     @RabbitHandler
     public void process(CorgiActivity activity) {
+        log.info("into post....");
         String lockKey = "on_hot-" + activity.getUserId();
         if (redisTemplate.hasKey(lockKey)) {
             return;
         }
+        log.info("into post no key....");
         if (CorgiActivity.CAT_TEXT.equals(activity.getCategory())) {
             return;
         }
+        log.info("into post not text....");
         UserDetail userDetail = corgiUserService.getUserDetailBasic(activity.getUserId());
         if (userDetail == null) {
             return;
         }
+        log.info("into post has detail....");
 //        if (WHITE_LIST.contains(activity.getUserId())) {
 //            this.onHot(activity, lockKey);
 //            return;
@@ -69,11 +73,13 @@ public class ActivityPostConsumer {
             this.onHot(activity, lockKey);
             return;
         }
+        log.info("into post not influencer....");
         String activityId = activity.getId();
         ActivityQuery query = new ActivityQuery();
         query.setPageSize(100);
         query.setUserId(activity.getUserId());
         List<CorgiActivity> corgiActivities = corgiActivityService.getFeedActivity(query);
+        log.info("into post size {}", corgiActivities.size());
         if (CollectionUtils.isEmpty(corgiActivities)) {
             double total = 0.0;
             int count = 0;
