@@ -89,6 +89,7 @@ public class ActivityPostConsumer {
                     max = likes;
                 }
             }
+            log.info("userID:{} max:{} total:{} count:{} avg:{}", activity.getUserId(), max, total, count, total / count);
             if (max >= 50 || total / count > 5) {
                 this.onHot(activity, lockKey);
             }
@@ -96,7 +97,7 @@ public class ActivityPostConsumer {
     }
 
     private void onHot(CorgiActivity activity, String lockKey) {
-        if (!redisTemplate.opsForValue().setIfAbsent(lockKey, System.currentTimeMillis() + "", 2L, TimeUnit.HOURS)) {
+        if (!redisTemplate.opsForValue().setIfAbsent(lockKey, System.currentTimeMillis() + "", 5L, TimeUnit.SECONDS)) {
             return;
         }
         CorgiVlogHot corgiVlogHot = new CorgiVlogHot();
