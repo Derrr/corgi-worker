@@ -80,7 +80,7 @@ public class UserFeedRefreshConsumer {
         List<CorgiVlog> result = new ArrayList<>();
         result = merge(result, recallHotVlog(userId, ctime, CorgiVlogHot.TYPE.AUTO, 2, "asc", groups), blackUserIds);
         result = merge(result, recallRecommendUser(userId, ctime, 1), blackUserIds);
-        result = merge(result, recallFollow(userId, ctime, 1), blackUserIds);
+        result = merge(result, recallFollow(userId, ctime, 5), blackUserIds);
         result = merge(result, recallTopic(userId, topic), blackUserIds);
         result = merge(result, recallRecommendVlog(userId, ctime, 10 - result.size(), "like"), blackUserIds);
         if (result.size() < 10 && !CollectionUtils.isEmpty(groupList)) {
