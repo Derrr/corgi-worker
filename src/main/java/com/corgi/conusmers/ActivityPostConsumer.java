@@ -89,7 +89,7 @@ public class ActivityPostConsumer {
                     max = likes;
                 }
             }
-            if (max >= 50 || total / count > 5) {
+            if (max >= 100 || total / count > 10) {
                 this.onHot(activity, lockKey);
             }
         } else {
