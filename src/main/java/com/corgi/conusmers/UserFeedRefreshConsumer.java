@@ -232,13 +232,12 @@ public class UserFeedRefreshConsumer {
 
         CorgiVlog recall = new CorgiVlog();
         recall.setUserId(userId);
-        recall.setCtime(ctime);
         List<CorgiVlog> vlogs = corgiVlogService.recallFollowedVlog(recall, size);
         Iterator<CorgiVlog> it = vlogs.iterator();
         List<String> userIds = new ArrayList<>();
-        while (it.hasNext()){
+        while (it.hasNext()) {
             CorgiVlog v = it.next();
-            if(userIds.contains(v.getUserId())){
+            if (userIds.contains(v.getUserId())) {
                 it.remove();
                 continue;
             }

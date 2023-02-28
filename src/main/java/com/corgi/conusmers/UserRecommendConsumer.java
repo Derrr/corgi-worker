@@ -167,9 +167,9 @@ public class UserRecommendConsumer {
             Double weight = recList.get(i).getValue();
             log.info("rec:{}:{}:{}:{} ", userId, recId, weight, myCount);
             Double finalWeight = weight / Math.sqrt(myCount.doubleValue());
-            //if (finalWeight > 10) {
-            corgiUserRecommendService.addRecUser(userId, recId, finalWeight);
-            //}
+            if (finalWeight > 1) {
+                corgiUserRecommendService.addRecUser(userId, recId, finalWeight);
+            }
         }
         log.info("add rec:" + (System.currentTimeMillis() - now) + "ms ");
     }
