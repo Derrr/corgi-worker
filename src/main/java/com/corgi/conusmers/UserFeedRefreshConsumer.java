@@ -232,9 +232,18 @@ public class UserFeedRefreshConsumer {
 
         CorgiVlog recall = new CorgiVlog();
         recall.setUserId(userId);
+        recall.setCtime(ctime);
         List<CorgiVlog> vlogs = corgiVlogService.recallFollowedVlog(recall, size);
-        for (CorgiVlog vlog : vlogs) {
-            vlog.setType("follow|");
+        Iterator<CorgiVlog> it = vlogs.iterator();
+        List<String> userIds = new ArrayList<>();
+        while (it.hasNext()){
+            CorgiVlog v = it.next();
+            if(userIds.contains(v.getUserId())){
+                it.remove();
+                continue;
+            }
+            userIds.add(v.getUserId());
+            v.setType("follow|");
         }
         return vlogs;
     }
@@ -243,7 +252,6 @@ public class UserFeedRefreshConsumer {
         List<UserProfile> userProfiles = corgiUserRecommendService.getVlogRecUser(userId, 100);
         List<CorgiVlog> vlogs = new ArrayList<>();
         CorgiVlog recall = new CorgiVlog();
-        recall.setCtime(ctime);
         recall.setUserId(userId);
         recall.setType("like");
         Random random = new Random();
