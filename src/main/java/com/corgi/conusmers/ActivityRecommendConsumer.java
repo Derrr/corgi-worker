@@ -105,7 +105,7 @@ public class ActivityRecommendConsumer {
             Double weight = recList.get(i).getValue();
             log.info("adding...{}:{} ", recId, weight);
             Double finalWeight = weight / Math.sqrt(myLikeCount.doubleValue());
-            if (finalWeight > 0.2) {
+            if (finalWeight > 1) {
                 corgiUserRecommendService.addRecActivity(userId, recId, finalWeight);
             }
         }
