@@ -1,22 +1,18 @@
 package com.corgi.conusmers;
 
 import com.alibaba.dubbo.config.annotation.Reference;
-import com.corgi.activity.api.CorgiActivityFeedService;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiQueueName;
-import com.corgi.common.messages.PushMessage;
-import com.corgi.common.messages.RecommendCalculater;
 import com.corgi.entity.ActivityQuery;
 import com.corgi.user.api.CorgiLikeService;
+import com.corgi.user.api.CorgiOrderService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.api.CorgiVlogService;
-import com.corgi.user.entity.ActivityLike;
+import com.corgi.user.entity.CorgiUserGoods;
 import com.corgi.user.entity.CorgiVlogHot;
 import com.corgi.user.entity.UserDetail;
-import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +38,8 @@ public class ActivityPostConsumer {
     private CorgiActivityService corgiActivityService;
     @Reference
     private CorgiUserService corgiUserService;
+    @Reference
+    private CorgiOrderService corgiOrderService;
     @Autowired
     private StringRedisTemplate redisTemplate;
 
@@ -89,8 +87,25 @@ public class ActivityPostConsumer {
                     max = likes;
                 }
             }
-            if (max >= 50 || total / count > 5) {
+            if (count == 0) {
+                this.preHot(activity, lockKey);
+            } else if (max >= 50 || total / count > 5) {
                 this.onHot(activity, lockKey);
+            } else if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
+                query.setCategory(CorgiActivity.CAT_PAYING);
+                corgiActivities = corgiActivityService.getFeedActivity(query);
+                if (CollectionUtils.isEmpty(corgiActivities)) {
+                    this.preHot(activity, lockKey);
+                    return;
+                }
+                CorgiUserGoods goods = new CorgiUserGoods();
+                goods.setTraderId(activity.getUserId());
+                goods.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
+                goods.setStart(0);
+                goods.setSize(100);
+                if (!CollectionUtils.isEmpty(corgiOrderService.getUserGoods(goods))) {
+                    this.preHot(activity, lockKey);
+                }
             }
         } else {
             this.preHot(activity, lockKey);
