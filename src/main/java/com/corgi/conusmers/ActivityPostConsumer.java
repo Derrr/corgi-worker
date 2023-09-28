@@ -89,7 +89,7 @@ public class ActivityPostConsumer {
             }
             if (count == 0) {
                 this.preHot(activity, lockKey);
-            } else if (max >= 50 || total / count > 5) {
+            } else if (max >= 100 || total / count > 10) {
                 this.onHot(activity, lockKey);
             } else if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
                 query.setCategory(CorgiActivity.CAT_PAYING);
