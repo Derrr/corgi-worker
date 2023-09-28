@@ -129,10 +129,14 @@ public class UserFeedRefreshConsumer {
         List<String> blackUserIds = new ArrayList<>();
         if (!redisTemplate.hasKey(blackKey)) {
             List<UserBasic> basicList = corgiBlacklistService.getBlackUser(userId);
+            List<String> beBlackedIds = corgiBlacklistService.getBeBlacked(userId);
             if (!CollectionUtils.isEmpty(basicList)) {
                 for (UserBasic basic : basicList) {
                     blackUserIds.add(basic.getUserId());
                 }
+            }
+            if (!CollectionUtils.isEmpty(beBlackedIds)) {
+                blackUserIds.addAll(beBlackedIds);
             }
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -30);
