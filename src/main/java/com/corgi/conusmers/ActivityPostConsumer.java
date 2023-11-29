@@ -115,7 +115,7 @@ public class ActivityPostConsumer {
                 goods.setTraderId(activity.getUserId());
                 goods.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
                 goods.setStart(0);
-                goods.setSize(1000);
+                goods.setSize(500);
                 List<CorgiUserGoods> goodsList = corgiOrderService.getUserGoods(goods);
                 String descBuyer = "您曾经购买过的付费动态用户 " + userDetail.getNickname() + " 新的付费可见动态，快去查看购买吧！";
                 String descFollower = "你关注的好友 " + userDetail.getNickname() + " 发布的付费动态正在被围观快去看看吧！";
