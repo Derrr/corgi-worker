@@ -55,6 +55,16 @@ public class CorgiWorkerApplication {
     }
 
     @Bean
+    public Queue groupRecommendQueue() {
+        return new Queue(CorgiQueueName.USER_GROUP_QUEUE);
+    }
+
+    @Bean
+    public Queue preferRecommendQueue() {
+        return new Queue(CorgiQueueName.USER_PREFER_QUEUE);
+    }
+
+    @Bean
     public Queue activityRecommendQueue() {
         return new Queue(CorgiQueueName.ACTIVITY_RECOMMEND_QUEUE);
     }
