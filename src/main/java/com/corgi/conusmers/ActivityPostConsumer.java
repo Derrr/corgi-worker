@@ -1,17 +1,19 @@
 package com.corgi.conusmers;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.corgi.activity.api.CorgiActivityFeedService;
 import com.corgi.activity.api.CorgiActivityService;
+import com.corgi.activity.entity.ActivityPic;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiQueueName;
+import com.corgi.common.messages.PushMessage;
 import com.corgi.entity.ActivityQuery;
-import com.corgi.user.api.CorgiLikeService;
-import com.corgi.user.api.CorgiOrderService;
-import com.corgi.user.api.CorgiUserService;
-import com.corgi.user.api.CorgiVlogService;
+import com.corgi.service.PushService;
+import com.corgi.user.api.*;
 import com.corgi.user.entity.CorgiUserGoods;
 import com.corgi.user.entity.CorgiVlogHot;
 import com.corgi.user.entity.UserDetail;
+import com.corgi.user.entity.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -19,9 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author tairanliu
@@ -40,8 +44,17 @@ public class ActivityPostConsumer {
     private CorgiUserService corgiUserService;
     @Reference
     private CorgiOrderService corgiOrderService;
+    @Reference
+    private CorgiPicService corgiPicService;
+    @Reference
+    private CorgiActivityFeedService corgiActivityFeedService;
+    @Reference
+    private CorgiUserFollowService corgiUserFollowService;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private PushService pushService;
+
 
     private final List<String> WHITE_LIST = Arrays.asList("744758", "521198", "600670", "528454");
 
@@ -103,8 +116,31 @@ public class ActivityPostConsumer {
                 goods.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
                 goods.setStart(0);
                 goods.setSize(100);
-                if (!CollectionUtils.isEmpty(corgiOrderService.getUserGoods(goods))) {
+                List<CorgiUserGoods> goodsList = corgiOrderService.getUserGoods(goods);
+                String descBuyer = "您曾经购买过的付费动态用户 " + userDetail.getNickname() + " 新的付费可见动态，快去查看购买吧！";
+                String descFollower = "你关注的好友 " + userDetail.getNickname() + " 发布的付费动态正在被围观快去看看吧！";
+                if (!CollectionUtils.isEmpty(goodsList)) {
                     this.preHot(activity, lockKey);
+                    List<String> traderIds = goodsList.stream().map(g -> g.getTraderId()).distinct().collect(Collectors.toList());
+                    PushMessage followerMessage = buildPayMessage(activity, descFollower);
+                    int page = 1;
+                    int pageSize = 500;
+                    while (true) {
+                        List<UserProfile> userProfiles = corgiUserFollowService.getFollowedUserByPage(activity.getUserId(), 0L, page, pageSize);
+                        page++;
+                        List<String> userIds = new ArrayList<>();
+                        for (UserProfile userProfile : userProfiles) {
+                            userIds.add(userProfile.getUserId());
+                            traderIds.remove(userProfile.getUserId());
+                        }
+                        pushService.sendMessage(followerMessage, userIds);
+                        if (com.alibaba.dubbo.common.utils.CollectionUtils.isEmpty(userProfiles) || userProfiles.size() < pageSize) {
+                            break;
+                        }
+                    }
+                    if (!CollectionUtils.isEmpty(traderIds)) {
+                        pushService.sendMessage(buildPayMessage(activity, descBuyer), traderIds);
+                    }
                 }
             }
         } else {
@@ -140,4 +176,25 @@ public class ActivityPostConsumer {
         //corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
     }
 
+    private PushMessage buildPayMessage(CorgiActivity activity, String desc) {
+        PushMessage pushMessage = new PushMessage();
+        pushMessage.setSourceUserId("corgihelper");
+        pushMessage.setMessage("热门动态提醒");
+        HashMap<String, Object> extra = new HashMap<>();
+        extra.put("type", "907");
+        extra.put("urlType", "2");
+        extra.put("url", activity.getId());
+        extra.put("alertTitle", "热门动态提醒");
+        if (activity.getCoverUrl() != null && !activity.getCoverUrl().contains("?x-oss-process")) {
+            if (StringUtils.isEmpty(activity.getVideoId())) {
+                extra.put("picUrl", activity.getCoverUrl() + "?x-oss-process=style/fuzzyCover");
+            } else {
+                extra.put("picUrl", activity.getCoverUrl());
+            }
+        }
+        extra.put("desc", desc);
+        extra.put("showPayReadMask", true);
+        pushMessage.setExtra(extra);
+        return pushMessage;
+    }
 }
