@@ -94,7 +94,6 @@ public class UserGroupConsumer {
                 for (String group : groupMap.keySet()) {
                     corgiUserRecommendService.updateGroupCor(userId, group, 0.0);
                 }
-
             }
             return;
         }
