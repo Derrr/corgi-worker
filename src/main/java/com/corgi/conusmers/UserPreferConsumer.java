@@ -51,6 +51,7 @@ public class UserPreferConsumer {
         long time = calendar.getTimeInMillis();
         List<UserProfile> followUsers = corgiUserFollowService.getFollowUserByPage(userId, "active", 0.0, 0.0, 1, 1000);
         Integer myCount = 0;
+        Double totalScore = 0.0;
         HashMap<String, Double> preferMap = corgiUserRecommendService.getPreferCor(userId);
         for (String group : preferMap.keySet()) {
             preferMap.put(group, 0.0);
@@ -73,11 +74,12 @@ public class UserPreferConsumer {
                     score = 0.0;
                     addGroup.add(group);
                 }
+                totalScore += groupMap.get(group);
                 preferMap.put(group, score + groupMap.get(group));
             }
             myCount++;
         }
-        if (myCount < 10) {
+        if (myCount < 10 || totalScore == 0) {
             if (!CollectionUtils.isEmpty(preferMap)) {
                 for (String group : preferMap.keySet()) {
                     corgiUserRecommendService.updatePreferCor(userId, group, 0.0);
@@ -89,7 +91,7 @@ public class UserPreferConsumer {
             corgiUserRecommendService.addPreferCor(userId, group);
         }
         for (String group : preferMap.keySet()) {
-            corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group));
+            corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group) / totalScore);
         }
     }
 

@@ -53,6 +53,7 @@ public class UserGroupConsumer {
         long time = calendar.getTimeInMillis();
         List<UserProfile> followUsers = corgiUserFollowService.getFollowedUserByPage(userId, 0, 1, 1000);
         Integer myCount = 0;
+        Double totalScore = 0.0;
         HashMap<String, Double> groupMap = corgiUserRecommendService.getGroupCor(userId);
         for (String group : groupMap.keySet()) {
             groupMap.put(group, 0.0);
@@ -85,11 +86,12 @@ public class UserGroupConsumer {
                     score = 0.0;
                     addGroup.add(group);
                 }
+                totalScore += preferMap.get(group);
                 groupMap.put(group, score + preferMap.get(group));
             }
             myCount++;
         }
-        if (myCount < 10) {
+        if (myCount < 10 || totalScore == 0) {
             if (!CollectionUtils.isEmpty(groupMap)) {
                 for (String group : groupMap.keySet()) {
                     corgiUserRecommendService.updateGroupCor(userId, group, 0.0);
@@ -107,7 +109,7 @@ public class UserGroupConsumer {
             if (score > maxGroupScore) {
                 maxGroup = group;
             }
-            corgiUserRecommendService.updateGroupCor(userId, group, score / myCount);
+            corgiUserRecommendService.updateGroupCor(userId, group, score / totalScore);
         }
         UserDetail update = new UserDetail();
         update.setUserId(userId);
