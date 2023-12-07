@@ -49,7 +49,7 @@ public class UserPreferConsumer {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -90);
         long time = calendar.getTimeInMillis();
-        List<UserProfile> followUsers = corgiUserFollowService.getFollowUserByPage(userId, "active", 0.0, 0.0, 1, 1000);
+        List<UserProfile> followUsers = corgiUserFollowService.getFollowUserByPage(userId, "active", 0.0, 0.0, 1, 10000);
         Integer myCount = 0;
         Double totalScore = 0.0;
         HashMap<String, Double> preferMap = corgiUserRecommendService.getPreferCor(userId);
