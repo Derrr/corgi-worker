@@ -52,6 +52,9 @@ public class UserPreferConsumer {
         List<UserProfile> followUsers = corgiUserFollowService.getFollowUserByPage(userId, "active", 0.0, 0.0, 1, 1000);
         Integer myCount = 0;
         HashMap<String, Double> preferMap = corgiUserRecommendService.getPreferCor(userId);
+        for (String group : preferMap.keySet()) {
+            preferMap.put(group, 0.0);
+        }
         List<String> addGroup = new ArrayList<>();
         for (UserProfile followUser : followUsers) {
             if (followUser == null) {

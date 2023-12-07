@@ -54,6 +54,9 @@ public class UserGroupConsumer {
         List<UserProfile> followUsers = corgiUserFollowService.getFollowedUserByPage(userId, 0, 1, 1000);
         Integer myCount = 0;
         HashMap<String, Double> groupMap = corgiUserRecommendService.getGroupCor(userId);
+        for (String group : groupMap.keySet()) {
+            groupMap.put(group, 0.0);
+        }
         List<String> addGroup = new ArrayList<>();
         for (UserProfile followUser : followUsers) {
             if (followUser == null) {
