@@ -70,14 +70,14 @@ public class UserGroupConsumer {
             }
             HashMap<String, Double> preferMap = corgiUserRecommendService.getPreferCor(followUser.getUserId());
             if (CollectionUtils.isEmpty(preferMap)) {
-                List<String> preferGroups = corgiUserService.getPreferGroup(followUser.getUserId());
-                if (!CollectionUtils.isEmpty(preferGroups)) {
-                    for (String group : preferGroups) {
-                        preferMap.put(group, 1.0 / preferGroups.size());
-                    }
-                } else {
-                    continue;
-                }
+//                List<String> preferGroups = corgiUserService.getPreferGroup(followUser.getUserId());
+//                if (!CollectionUtils.isEmpty(preferGroups)) {
+//                    for (String group : preferGroups) {
+//                        preferMap.put(group, 1.0 / preferGroups.size());
+//                    }
+//                } else {
+                continue;
+//                }
             }
             for (String group : preferMap.keySet()) {
                 Double score = groupMap.get(group);
