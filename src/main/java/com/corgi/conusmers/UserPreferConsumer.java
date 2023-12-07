@@ -57,9 +57,9 @@ public class UserPreferConsumer {
             if (followUser == null) {
                 continue;
             }
-            if (followUser.getTime() < time) {
-                continue;
-            }
+//            if (followUser.getTime() < time) {
+//                continue;
+//            }
             HashMap<String, Double> groupMap = corgiUserRecommendService.getGroupCor(followUser.getUserId());
             if (CollectionUtils.isEmpty(groupMap)) {
                 continue;

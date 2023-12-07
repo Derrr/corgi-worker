@@ -59,9 +59,9 @@ public class UserGroupConsumer {
             if (followUser == null) {
                 continue;
             }
-            if (followUser.getTime() < time) {
-                continue;
-            }
+//            if (followUser.getTime() < time) {
+//                continue;
+//            }
             if (!StringUtils.isEmpty(followUser.getAvatarStatus()) && followUser.getAvatarStatus().startsWith("fake")) {
                 continue;
             }
