@@ -72,6 +72,8 @@ public class UserGroupConsumer {
                     for (String group : preferGroups) {
                         preferMap.put(group, 1.0 / preferGroups.size());
                     }
+                } else {
+                    continue;
                 }
             }
             for (String group : preferMap.keySet()) {
@@ -97,7 +99,7 @@ public class UserGroupConsumer {
             if (score > maxGroupScore) {
                 maxGroup = group;
             }
-            corgiUserRecommendService.updatePreferCor(userId, group, score / myCount);
+            corgiUserRecommendService.updateGroupCor(userId, group, score / myCount);
         }
         UserDetail update = new UserDetail();
         update.setUserId(userId);
