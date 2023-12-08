@@ -77,9 +77,9 @@ public class UserPreferConsumer {
             }
             totalScore += 1.0;
             preferMap.put(group, score + 1.0);
+            //}
+            myCount++;
         }
-        myCount++;
-        //}
         if (myCount < 10 || totalScore == 0) {
             if (!CollectionUtils.isEmpty(preferMap)) {
                 for (String group : preferMap.keySet()) {
