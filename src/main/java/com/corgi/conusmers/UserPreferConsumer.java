@@ -48,7 +48,6 @@ public class UserPreferConsumer {
         }
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -90);
-        long time = calendar.getTimeInMillis();
         List<UserProfile> followUsers = corgiUserFollowService.getFollowUserByPage(userId, "active", 0.0, 0.0, 1, 10000);
         Integer myCount = 0;
         Double totalScore = 0.0;
@@ -61,24 +60,26 @@ public class UserPreferConsumer {
             if (followUser == null) {
                 continue;
             }
-//            if (followUser.getTime() < time) {
-//                continue;
-//            }
-            HashMap<String, Double> groupMap = corgiUserRecommendService.getGroupCor(followUser.getUserId());
-            if (CollectionUtils.isEmpty(groupMap)) {
+            //HashMap<String, Double> groupMap = corgiUserRecommendService.getGroupCor(followUser.getUserId());
+            UserDetail followDetail = corgiUserService.getUserDetailBasic(followUser.getUserId());
+            if (followDetail == null) {
                 continue;
             }
-            for (String group : groupMap.keySet()) {
-                Double score = preferMap.get(group);
-                if (score == null) {
-                    score = 0.0;
-                    addGroup.add(group);
-                }
-                totalScore += groupMap.get(group);
-                preferMap.put(group, score + groupMap.get(group));
+            String group = followDetail.getGroup();
+            if (StringUtils.isEmpty(group)) {
+                continue;
             }
-            myCount++;
+            //for (String group : groupMap.keySet()) {
+            Double score = preferMap.get(group);
+            if (score == null) {
+                score = 0.0;
+                addGroup.add(group);
+            }
+            totalScore += 1.0;
+            preferMap.put(group, score + 1.0);
         }
+        myCount++;
+        //}
         if (myCount < 10 || totalScore == 0) {
             if (!CollectionUtils.isEmpty(preferMap)) {
                 for (String group : preferMap.keySet()) {
