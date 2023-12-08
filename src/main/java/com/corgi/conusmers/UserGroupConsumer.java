@@ -50,7 +50,6 @@ public class UserGroupConsumer {
         }
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -180);
-        long time = calendar.getTimeInMillis();
         List<UserProfile> followUsers = corgiUserFollowService.getFollowedUserByPage(userId, 0, 1, 10000);
         Integer myCount = 0;
         Double totalScore = 0.0;
