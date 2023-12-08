@@ -86,10 +86,9 @@ public class UserGroupConsumer {
                     corgiUserRecommendService.updateGroupCor(userId, group, 0.0);
                 }
             }
-            UserDetail detail = corgiUserService.getUserDetailBasic(userId);
             UserDetail update = new UserDetail();
             update.setUserId(userId);
-            update.setHideGroup(detail.getGroup());
+            update.setHideGroup("0");
             corgiUserService.updateDetail(update);
             return;
         }
