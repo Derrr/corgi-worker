@@ -102,6 +102,7 @@ public class UserGroupConsumer {
             Double score = groupMap.get(group);
             if (score > maxGroupScore) {
                 maxGroup = group;
+                maxGroupScore = score;
             }
             corgiUserRecommendService.updateGroupCor(userId, group, score / totalScore);
         }
