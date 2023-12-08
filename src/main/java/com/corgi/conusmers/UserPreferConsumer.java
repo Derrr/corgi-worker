@@ -60,24 +60,24 @@ public class UserPreferConsumer {
             if (followUser == null) {
                 continue;
             }
-            //HashMap<String, Double> groupMap = corgiUserRecommendService.getGroupCor(followUser.getUserId());
-            UserDetail followDetail = corgiUserService.getUserDetailBasic(followUser.getUserId());
-            if (followDetail == null) {
+            HashMap<String, Double> groupMap = corgiUserRecommendService.getGroupCor(followUser.getUserId());
+            //UserDetail followDetail = corgiUserService.getUserDetailBasic(followUser.getUserId());
+//            if (followDetail == null) {
+//                continue;
+//            }
+//            String group = followDetail.getGroup();
+            if (CollectionUtils.isEmpty(groupMap)) {
                 continue;
             }
-            String group = followDetail.getGroup();
-            if (StringUtils.isEmpty(group)) {
-                continue;
+            for (String group : groupMap.keySet()) {
+                Double score = preferMap.get(group);
+                if (score == null) {
+                    score = 0.0;
+                    addGroup.add(group);
+                }
+                totalScore += groupMap.get(group);
+                preferMap.put(group, score + groupMap.get(group));
             }
-            //for (String group : groupMap.keySet()) {
-            Double score = preferMap.get(group);
-            if (score == null) {
-                score = 0.0;
-                addGroup.add(group);
-            }
-            totalScore += 1.0;
-            preferMap.put(group, score + 1.0);
-            //}
             myCount++;
         }
         if (myCount < 10 || totalScore == 0) {
