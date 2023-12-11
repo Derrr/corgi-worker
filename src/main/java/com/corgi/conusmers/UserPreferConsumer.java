@@ -43,7 +43,7 @@ public class UserPreferConsumer {
     public void process(Channel channel, Message message, RecommendCalculater calculater) {
         String userId = calculater.getUserId();
         log.info("calculating... " + userId);
-        if (!StringUtils.isEmpty(userId)) {
+        if (StringUtils.isEmpty(userId)) {
             return;
         }
         Integer myCount = 0;
@@ -54,7 +54,7 @@ public class UserPreferConsumer {
         }
         List<String> addGroup = new ArrayList<>();
         for (int i = 1; i < 100; i++) {
-            List<UserProfile> followUsers = corgiUserFollowService.getFollowUserByPage(userId, "active", 0.0, 0.0, 1, 10000);
+            List<UserProfile> followUsers = corgiUserFollowService.getFollowUserByPage(userId, "active", 0.0, 0.0, i, 10000);
             if (CollectionUtils.isEmpty(followUsers)) {
                 break;
             }
