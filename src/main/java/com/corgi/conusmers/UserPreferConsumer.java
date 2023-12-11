@@ -75,7 +75,7 @@ public class UserPreferConsumer {
                     score = 0.0;
                     addGroup.add(group);
                 }
-                Double groupScore = groupMap.get(group) * groupMap.get(group);
+                Double groupScore = groupMap.get(group);
                 totalScore += groupScore;
                 preferMap.put(group, score + groupScore);
             }
@@ -93,7 +93,7 @@ public class UserPreferConsumer {
             corgiUserRecommendService.addPreferCor(userId, group);
         }
         for (String group : preferMap.keySet()) {
-            corgiUserRecommendService.updatePreferCor(userId, group, Math.sqrt(preferMap.get(group)));
+            corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group));
         }
     }
 
