@@ -54,7 +54,6 @@ public class UserGroupConsumer {
         }
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -180);
-        Integer myCount = 0;
         Double totalScore = 0.0;
         HashMap<String, Double> groupMap = corgiUserRecommendService.getGroupCor(userId);
         for (String group : groupMap.keySet()) {
