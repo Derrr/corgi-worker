@@ -48,6 +48,10 @@ public class UserGroupConsumer {
         if (StringUtils.isEmpty(userId)) {
             return;
         }
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
+        if (userDetail == null || (!StringUtils.isEmpty(userDetail.getAvatarStatus()) && userDetail.getAvatarStatus().startsWith("fake"))) {
+            return;
+        }
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -180);
         Integer myCount = 0;

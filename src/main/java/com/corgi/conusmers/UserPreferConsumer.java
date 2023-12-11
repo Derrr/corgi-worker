@@ -46,6 +46,10 @@ public class UserPreferConsumer {
         if (StringUtils.isEmpty(userId)) {
             return;
         }
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
+        if (userDetail == null || (!StringUtils.isEmpty(userDetail.getAvatarStatus()) && userDetail.getAvatarStatus().startsWith("fake"))) {
+            return;
+        }
         Integer myCount = 0;
         Double totalScore = 0.0;
         HashMap<String, Double> preferMap = corgiUserRecommendService.getPreferCor(userId);
