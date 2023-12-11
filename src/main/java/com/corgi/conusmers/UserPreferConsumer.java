@@ -83,14 +83,14 @@ public class UserPreferConsumer {
                 myCount++;
             }
         }
-//        if (myCount < 10 || totalScore == 0) {
-//            if (!CollectionUtils.isEmpty(preferMap)) {
-//                for (String group : preferMap.keySet()) {
-//                    corgiUserRecommendService.updatePreferCor(userId, group, 0.0);
-//                }
-//            }
-//            return;
-//        }
+        if (totalScore == 0) {
+            if (!CollectionUtils.isEmpty(preferMap)) {
+                for (String group : preferMap.keySet()) {
+                    corgiUserRecommendService.updatePreferCor(userId, group, 0.0);
+                }
+            }
+            return;
+        }
         for (String group : addGroup) {
             corgiUserRecommendService.addPreferCor(userId, group);
         }

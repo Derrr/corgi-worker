@@ -89,7 +89,7 @@ public class UserGroupConsumer {
                 myCount++;
             }
         }
-        if (myCount < 10 || totalScore == 0) {
+        if (totalScore == 0) {
             if (!CollectionUtils.isEmpty(groupMap)) {
                 for (String group : groupMap.keySet()) {
                     corgiUserRecommendService.updateGroupCor(userId, group, 0.0);
