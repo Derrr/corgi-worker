@@ -50,7 +50,6 @@ public class UserGroupConsumer {
         }
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -180);
-        List<UserProfile> followUsers = corgiUserFollowService.getFollowedUserByPage(userId, 0, 1, 10000);
         Integer myCount = 0;
         Double totalScore = 0.0;
         HashMap<String, Double> groupMap = corgiUserRecommendService.getGroupCor(userId);
@@ -58,27 +57,33 @@ public class UserGroupConsumer {
             groupMap.put(group, 0.0);
         }
         List<String> addGroup = new ArrayList<>();
-        for (UserProfile followUser : followUsers) {
-            if (followUser == null) {
-                continue;
+        for (int i = 1; i < 100; i++) {
+            List<UserProfile> followUsers = corgiUserFollowService.getFollowedUserByPage(userId, 0, i, 10000);
+            if (CollectionUtils.isEmpty(followUsers)) {
+                break;
             }
-            if (!StringUtils.isEmpty(followUser.getAvatarStatus()) && followUser.getAvatarStatus().startsWith("fake")) {
-                continue;
-            }
-            HashMap<String, Double> preferMap = corgiUserRecommendService.getPreferCor(followUser.getUserId());
-            if (CollectionUtils.isEmpty(preferMap)) {
-                continue;
-            }
-            for (String group : preferMap.keySet()) {
-                Double score = groupMap.get(group);
-                if (score == null) {
-                    score = 0.0;
-                    addGroup.add(group);
+            for (UserProfile followUser : followUsers) {
+                if (followUser == null) {
+                    continue;
                 }
-                totalScore += preferMap.get(group);
-                groupMap.put(group, score + preferMap.get(group));
+                if (!StringUtils.isEmpty(followUser.getAvatarStatus()) && followUser.getAvatarStatus().startsWith("fake")) {
+                    continue;
+                }
+                HashMap<String, Double> preferMap = corgiUserRecommendService.getPreferCor(followUser.getUserId());
+                if (CollectionUtils.isEmpty(preferMap)) {
+                    continue;
+                }
+                for (String group : preferMap.keySet()) {
+                    Double score = groupMap.get(group);
+                    if (score == null) {
+                        score = 0.0;
+                        addGroup.add(group);
+                    }
+                    totalScore += preferMap.get(group);
+                    groupMap.put(group, score + preferMap.get(group));
+                }
+                myCount++;
             }
-            myCount++;
         }
         if (myCount < 10 || totalScore == 0) {
             if (!CollectionUtils.isEmpty(groupMap)) {
