@@ -79,7 +79,6 @@ public class UserPreferConsumer {
                     totalScore += groupScore;
                     preferMap.put(group, score + groupScore);
                 }
-                myCount++;
             }
         }
         if (totalScore == 0) {

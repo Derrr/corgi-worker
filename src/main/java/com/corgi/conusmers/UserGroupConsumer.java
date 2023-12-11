@@ -85,7 +85,6 @@ public class UserGroupConsumer {
                     totalScore += preferMap.get(group);
                     groupMap.put(group, score + preferMap.get(group));
                 }
-                myCount++;
             }
         }
         if (totalScore == 0) {
