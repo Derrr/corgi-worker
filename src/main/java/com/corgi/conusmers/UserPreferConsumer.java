@@ -93,15 +93,15 @@ public class UserPreferConsumer {
             corgiUserRecommendService.addPreferCor(userId, group);
         }
         for (String group : preferMap.keySet()) {
-            Double groupWeight = 1.0;
-            Object weight = redisTemplate.opsForHash().get("group_weight", group);
-            try {
-                if (weight != null && Double.valueOf(weight.toString()) > 0) {
-                    groupWeight = Double.valueOf(weight.toString());
-                }
-            } catch (Exception e) {
-                log.info("group weight goes wrong", e);
-            }
+//            Double groupWeight = 1.0;
+//            Object weight = redisTemplate.opsForHash().get("group_weight", group);
+//            try {
+//                if (weight != null && Double.valueOf(weight.toString()) > 0) {
+//                    groupWeight = Double.valueOf(weight.toString());
+//                }
+//            } catch (Exception e) {
+//                log.info("group weight goes wrong", e);
+//            }
             corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group) / groupWeight);
         }
     }
