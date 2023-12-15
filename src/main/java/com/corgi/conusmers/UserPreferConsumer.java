@@ -102,7 +102,7 @@ public class UserPreferConsumer {
 //            } catch (Exception e) {
 //                log.info("group weight goes wrong", e);
 //            }
-            corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group) / groupWeight);
+            corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group));
         }
     }
 
