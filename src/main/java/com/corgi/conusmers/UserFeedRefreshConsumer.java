@@ -6,6 +6,7 @@ import com.corgi.common.CorgiQueueName;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,8 +62,15 @@ public class UserFeedRefreshConsumer {
         List<String> blackUserIds = this.getBlackIds(userId);
         String ctime = sdf.format(new Date());
         String groups = null;
-        List<String> groupList = corgiUserService.getPreferGroup(userId);
-        if (!CollectionUtils.isEmpty(groupList)) {
+        List<String> groupList = new ArrayList<>();
+        HashMap<String, Double> groupPrefer = corgiUserRecommendService.getPreferCor(userId);
+        if (!CollectionUtils.isEmpty(groupPrefer)) {
+            Double avg = groupPrefer.values().stream().reduce((m, n) -> m + n).get() / groupPrefer.size();
+            for (String group : groupPrefer.keySet()) {
+                if (groupPrefer.get(group) > avg) {
+                    groupList.add(group);
+                }
+            }
             groups = String.join("','", groupList);
         }
         String topic = "";
