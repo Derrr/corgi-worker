@@ -106,12 +106,6 @@ public class UserGroupConsumer {
         Double maxGroupScore = 0.0;
         for (String group : groupMap.keySet()) {
             Double score = groupMap.get(group);
-            try {
-                Double weight = Double.valueOf(redisTemplate.opsForHash().get("group_weight", group).toString());
-                score /= weight;
-            } catch (Exception e) {
-
-            }
             if (score > maxGroupScore) {
                 maxGroup = group;
                 maxGroupScore = score;
