@@ -116,7 +116,7 @@ public class UserGroupConsumer {
                 maxGroup = group;
                 maxGroupScore = score;
             }
-            corgiUserRecommendService.updateGroupCor(userId, group, groupMap.get(group) / totalScore);
+            corgiUserRecommendService.updateGroupCor(userId, group, groupMap.get(group)*10000 / totalScore);
         }
         UserDetail update = new UserDetail();
         update.setUserId(userId);
