@@ -71,6 +71,7 @@ public class UserPreferConsumer {
                 if (CollectionUtils.isEmpty(groupMap)) {
                     continue;
                 }
+                Double oldTotalScore = totalScore;
                 for (String group : groupMap.keySet()) {
                     Double score = preferMap.get(group);
                     if (score == null) {
@@ -79,8 +80,10 @@ public class UserPreferConsumer {
                     }
                     Double groupScore = groupMap.get(group);
                     totalScore += groupScore;
-                    follow++;
                     preferMap.put(group, score + groupScore);
+                }
+                if (oldTotalScore < totalScore) {
+                    follow++;
                 }
             }
         }
