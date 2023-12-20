@@ -38,6 +38,8 @@ public class UserGroupConsumer {
     private CorgiUserFollowService corgiUserFollowService;
     @Reference
     private CorgiUserRecommendService corgiUserRecommendService;
+    @Reference
+    private CorgiStatisticService corgiStatisticService;
     @Autowired
     private StringRedisTemplate redisTemplate;
 
@@ -56,6 +58,7 @@ public class UserGroupConsumer {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -180);
         Double totalScore = 0.0;
+        Integer fans = 0;
         HashMap<String, Double> groupMap = corgiUserRecommendService.getGroupCor(userId);
         for (String group : groupMap.keySet()) {
             groupMap.put(group, 0.0);
@@ -77,6 +80,7 @@ public class UserGroupConsumer {
                 if (CollectionUtils.isEmpty(preferMap)) {
                     continue;
                 }
+                Double oldTotalScore = totalScore;
                 for (String group : preferMap.keySet()) {
                     Double score = groupMap.get(group);
                     if (score == null) {
@@ -85,6 +89,9 @@ public class UserGroupConsumer {
                     }
                     totalScore += preferMap.get(group);
                     groupMap.put(group, score + preferMap.get(group));
+                }
+                if (oldTotalScore < totalScore) {
+                    fans++;
                 }
             }
         }
@@ -99,8 +106,9 @@ public class UserGroupConsumer {
         for (String group : addGroup) {
             corgiUserRecommendService.addGroupCor(userId, group);
         }
+        long totalFans = corgiStatisticService.sumCount("fans", userId, "");
         for (String group : groupMap.keySet()) {
-            corgiUserRecommendService.updateGroupCor(userId, group, groupMap.get(group) * 10000.0 / totalScore);
+            corgiUserRecommendService.updateGroupCor(userId, group, groupMap.get(group) * 10000.0 * fans / (totalScore * totalFans));
         }
     }
 
