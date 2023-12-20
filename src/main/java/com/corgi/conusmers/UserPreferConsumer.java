@@ -96,7 +96,7 @@ public class UserPreferConsumer {
             corgiUserRecommendService.addPreferCor(userId, group);
         }
         for (String group : preferMap.keySet()) {
-            corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group) * follow / totalScore);
+            corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group) * 1000.0 * follow / totalScore);
         }
         //更新对方hide_group
 //        HashMap<String, Double> groupMap = corgiUserRecommendService.getGroupCor(userId);
