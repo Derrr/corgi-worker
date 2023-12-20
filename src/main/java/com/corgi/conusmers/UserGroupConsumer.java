@@ -93,35 +93,35 @@ public class UserGroupConsumer {
                     corgiUserRecommendService.updateGroupCor(userId, group, 0.0);
                 }
             }
-            UserDetail update = new UserDetail();
-            update.setUserId(userId);
-            update.setHideGroup("0");
-            corgiUserService.updateDetail(update);
+//            UserDetail update = new UserDetail();
+//            update.setUserId(userId);
+//            update.setHideGroup("0");
+//            corgiUserService.updateDetail(update);
             return;
         }
         for (String group : addGroup) {
             corgiUserRecommendService.addGroupCor(userId, group);
         }
-        String maxGroup = "";
-        Double maxGroupScore = 0.0;
+//        String maxGroup = "";
+//        Double maxGroupScore = 0.0;
         for (String group : groupMap.keySet()) {
-            Double score = groupMap.get(group);
-            try {
-                Double weight = Double.valueOf(redisTemplate.opsForHash().get("group_weight", group).toString());
-                score /= weight;
-            } catch (Exception e) {
-
-            }
-            if (score > maxGroupScore) {
-                maxGroup = group;
-                maxGroupScore = score;
-            }
+//            Double score = groupMap.get(group);
+//            try {
+//                Double weight = Double.valueOf(redisTemplate.opsForHash().get("group_weight", group).toString());
+//                score /= weight;
+//            } catch (Exception e) {
+//
+//            }
+//            if (score > maxGroupScore) {
+//                maxGroup = group;
+//                maxGroupScore = score;
+//            }
             corgiUserRecommendService.updateGroupCor(userId, group, groupMap.get(group)*10000 / totalScore);
         }
-        UserDetail update = new UserDetail();
-        update.setUserId(userId);
-        update.setHideGroup(maxGroup);
-        corgiUserService.updateDetail(update);
+//        UserDetail update = new UserDetail();
+//        update.setUserId(userId);
+//        update.setHideGroup(maxGroup);
+//        corgiUserService.updateDetail(update);
     }
 
 }
