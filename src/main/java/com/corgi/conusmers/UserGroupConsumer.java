@@ -77,7 +77,6 @@ public class UserGroupConsumer {
                 if (CollectionUtils.isEmpty(preferMap)) {
                     continue;
                 }
-                Double oldTotalScore = totalScore;
                 for (String group : preferMap.keySet()) {
                     Double score = groupMap.get(group);
                     if (score == null) {
