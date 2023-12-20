@@ -3,6 +3,7 @@ package com.corgi.conusmers;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.common.messages.RecommendCalculater;
+import com.corgi.user.api.CorgiStatisticService;
 import com.corgi.user.api.CorgiUserFollowService;
 import com.corgi.user.api.CorgiUserRecommendService;
 import com.corgi.user.api.CorgiUserService;
@@ -51,6 +52,7 @@ public class UserPreferConsumer {
             return;
         }
         Double totalScore = 0.0;
+        Integer follow = 0;
         HashMap<String, Double> preferMap = corgiUserRecommendService.getPreferCor(userId);
         for (String group : preferMap.keySet()) {
             preferMap.put(group, 0.0);
@@ -77,6 +79,7 @@ public class UserPreferConsumer {
                     }
                     Double groupScore = groupMap.get(group);
                     totalScore += groupScore;
+                    follow++;
                     preferMap.put(group, score + groupScore);
                 }
             }
@@ -93,7 +96,7 @@ public class UserPreferConsumer {
             corgiUserRecommendService.addPreferCor(userId, group);
         }
         for (String group : preferMap.keySet()) {
-            corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group) / 10000.0);
+            corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group) * follow / totalScore);
         }
         //更新对方hide_group
 //        HashMap<String, Double> groupMap = corgiUserRecommendService.getGroupCor(userId);

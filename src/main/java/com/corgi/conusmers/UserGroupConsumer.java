@@ -3,6 +3,7 @@ package com.corgi.conusmers;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.common.messages.RecommendCalculater;
+import com.corgi.user.api.CorgiStatisticService;
 import com.corgi.user.api.CorgiUserFollowService;
 import com.corgi.user.api.CorgiUserRecommendService;
 import com.corgi.user.api.CorgiUserService;
@@ -60,6 +61,7 @@ public class UserGroupConsumer {
             groupMap.put(group, 0.0);
         }
         List<String> addGroup = new ArrayList<>();
+        Integer fans = 0;
         for (int i = 1; i < 100; i++) {
             List<UserProfile> followUsers = corgiUserFollowService.getFollowedUserByPage(userId, 0, i, 10000);
             if (CollectionUtils.isEmpty(followUsers)) {
@@ -83,6 +85,7 @@ public class UserGroupConsumer {
                         addGroup.add(group);
                     }
                     totalScore += preferMap.get(group);
+                    fans++;
                     groupMap.put(group, score + preferMap.get(group));
                 }
             }
@@ -104,6 +107,7 @@ public class UserGroupConsumer {
         }
 //        String maxGroup = "";
 //        Double maxGroupScore = 0.0;
+        //long fans = corgiStatisticService.sumCount("fans", userId, "");
         for (String group : groupMap.keySet()) {
 //            Double score = groupMap.get(group);
 //            try {
@@ -116,7 +120,7 @@ public class UserGroupConsumer {
 //                maxGroup = group;
 //                maxGroupScore = score;
 //            }
-            corgiUserRecommendService.updateGroupCor(userId, group, groupMap.get(group)*10000 / totalScore);
+            corgiUserRecommendService.updateGroupCor(userId, group, groupMap.get(group) * fans * 1000.0 / totalScore);
         }
 //        UserDetail update = new UserDetail();
 //        update.setUserId(userId);
