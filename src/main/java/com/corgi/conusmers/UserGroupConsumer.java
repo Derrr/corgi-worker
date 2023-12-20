@@ -48,7 +48,7 @@ public class UserGroupConsumer {
     public void process(Channel channel, Message message, RecommendCalculater calculater) {
         String userId = calculater.getUserId();
         log.info("calculating... " + userId);
-        if (StringUtils.isEmpty(userId)) {
+        if (!StringUtils.isEmpty(userId)) {
             return;
         }
         UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
