@@ -36,6 +36,8 @@ public class UserPreferConsumer {
     private CorgiUserFollowService corgiUserFollowService;
     @Reference
     private CorgiUserRecommendService corgiUserRecommendService;
+    @Reference
+    private CorgiStatisticService corgiStatisticService;
     @Autowired
     private StringRedisTemplate redisTemplate;
 
@@ -98,8 +100,9 @@ public class UserPreferConsumer {
         for (String group : addGroup) {
             corgiUserRecommendService.addPreferCor(userId, group);
         }
+        long totalFollow = corgiStatisticService.sumCount("follow", userId, "");
         for (String group : preferMap.keySet()) {
-            corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group) * 1000.0 * follow / totalScore);
+            corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group) * 1000.0 * follow * follow / (totalScore * totalFollow));
         }
         //更新对方hide_group
 //        HashMap<String, Double> groupMap = corgiUserRecommendService.getGroupCor(userId);
