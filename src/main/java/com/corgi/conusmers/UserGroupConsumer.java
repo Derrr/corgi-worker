@@ -61,7 +61,6 @@ public class UserGroupConsumer {
             groupMap.put(group, 0.0);
         }
         List<String> addGroup = new ArrayList<>();
-        Integer fans = 0;
         for (int i = 1; i < 100; i++) {
             List<UserProfile> followUsers = corgiUserFollowService.getFollowedUserByPage(userId, 0, i, 10000);
             if (CollectionUtils.isEmpty(followUsers)) {
@@ -88,9 +87,6 @@ public class UserGroupConsumer {
                     totalScore += preferMap.get(group);
                     groupMap.put(group, score + preferMap.get(group));
                 }
-                if (oldTotalScore < totalScore) {
-                    fans++;
-                }
             }
         }
         if (totalScore == 0) {
@@ -105,7 +101,7 @@ public class UserGroupConsumer {
             corgiUserRecommendService.addGroupCor(userId, group);
         }
         for (String group : groupMap.keySet()) {
-            corgiUserRecommendService.updateGroupCor(userId, group, groupMap.get(group) * fans * 1000.0 / totalScore);
+            corgiUserRecommendService.updateGroupCor(userId, group, groupMap.get(group) * 10000.0 / totalScore);
         }
     }
 
