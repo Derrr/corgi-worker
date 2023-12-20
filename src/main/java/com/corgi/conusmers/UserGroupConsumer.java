@@ -95,7 +95,7 @@ public class UserGroupConsumer {
                 }
             }
         }
-        if (totalScore == 0) {
+        if (totalScore < 1 || fans == 0) {
             if (!CollectionUtils.isEmpty(groupMap)) {
                 for (String group : groupMap.keySet()) {
                     corgiUserRecommendService.updateGroupCor(userId, group, 0.0);

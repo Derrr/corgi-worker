@@ -89,7 +89,7 @@ public class UserPreferConsumer {
                 }
             }
         }
-        if (totalScore == 0) {
+        if (totalScore < 1 || follow == 0) {
             if (!CollectionUtils.isEmpty(preferMap)) {
                 for (String group : preferMap.keySet()) {
                     corgiUserRecommendService.updatePreferCor(userId, group, 0.0);
