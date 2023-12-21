@@ -102,7 +102,7 @@ public class UserPreferConsumer {
         }
         Long totalFollow = corgiStatisticService.sumCount("follow", userId, "");
         for (String group : preferMap.keySet()) {
-            corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group) * 1000.0 * follow * follow / (totalScore * totalFollow));
+            corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group) * 1000 * follow * follow / (totalScore * totalFollow));
         }
         //更新对方hide_group
 //        HashMap<String, Double> groupMap = corgiUserRecommendService.getGroupCor(userId);
