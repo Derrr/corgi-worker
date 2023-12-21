@@ -46,11 +46,11 @@ public class UserPreferConsumer {
     public void process(Channel channel, Message message, RecommendCalculater calculater) {
         String userId = calculater.getUserId();
         log.info("calculating... " + userId);
-        if (StringUtils.isEmpty(userId)) {
+        if (!StringUtils.isEmpty(userId)) {
             return;
         }
-        UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
-        if (userDetail == null || (!StringUtils.isEmpty(userDetail.getAvatarStatus()) && userDetail.getAvatarStatus().startsWith("fake"))) {
+        Long totalFollow = corgiStatisticService.sumCount("follow", userId, "");
+        if (totalFollow == 0) {
             return;
         }
         Double totalScore = 0.0;
@@ -100,7 +100,7 @@ public class UserPreferConsumer {
         for (String group : addGroup) {
             corgiUserRecommendService.addPreferCor(userId, group);
         }
-        Long totalFollow = corgiStatisticService.sumCount("follow", userId, "");
+
         for (String group : preferMap.keySet()) {
             corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group) * follow / (10.0 * totalFollow));
         }

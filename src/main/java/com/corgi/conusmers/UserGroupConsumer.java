@@ -51,8 +51,8 @@ public class UserGroupConsumer {
         if (StringUtils.isEmpty(userId)) {
             return;
         }
-        UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
-        if (userDetail == null || (!StringUtils.isEmpty(userDetail.getAvatarStatus()) && userDetail.getAvatarStatus().startsWith("fake"))) {
+        Long totalFollow = corgiStatisticService.sumCount("follow", userId, "");
+        if (totalFollow == 0) {
             return;
         }
         Calendar calendar = Calendar.getInstance();
