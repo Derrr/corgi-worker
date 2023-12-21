@@ -106,9 +106,8 @@ public class UserGroupConsumer {
         for (String group : addGroup) {
             corgiUserRecommendService.addGroupCor(userId, group);
         }
-        long totalFans = corgiStatisticService.sumCount("fans", userId, "");
         for (String group : groupMap.keySet()) {
-            corgiUserRecommendService.updateGroupCor(userId, group, groupMap.get(group) * 10000.0 * fans / (totalScore * totalFans));
+            corgiUserRecommendService.updateGroupCor(userId, group, groupMap.get(group) * 10000.0 / totalScore);
         }
     }
 
