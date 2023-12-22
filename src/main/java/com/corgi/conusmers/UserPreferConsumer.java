@@ -118,6 +118,7 @@ public class UserPreferConsumer {
 
         String maxHideGroup = "0";
         if (!CollectionUtils.isEmpty(groupMap)) {
+            Double sum = groupMap.values().stream().reduce((m, n) -> m + n).get();
             for (String key : groupMap.keySet()) {
                 Double thresholdWeight = 0.0;
                 Integer thresholdCount = Integer.MAX_VALUE - 1;
@@ -133,7 +134,7 @@ public class UserPreferConsumer {
                 } catch (Exception e) {
                     log.info("group weight goes wrong", e);
                 }
-                Double weight = groupMap.get(key);
+                Double weight = groupMap.get(key) / sum;
                 if (thresholdWeight < weight && thresholdCount < minCount) {
                     minCount = thresholdCount;
                     hideGroup = key;
