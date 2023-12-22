@@ -143,6 +143,7 @@ public class UserPreferConsumer {
                     maxWeight = weight;
                     maxHideGroup = key;
                 }
+
             }
             if ("0".equals(hideGroup)) {
                 hideGroup = maxHideGroup;
