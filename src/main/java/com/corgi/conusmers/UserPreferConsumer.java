@@ -53,6 +53,7 @@ public class UserPreferConsumer {
         if (totalFollow == 0) {
             return;
         }
+        this.updateHideGroup(userId);
         Double totalScore = 0.0;
         Integer follow = 0;
         HashMap<String, Double> preferMap = corgiUserRecommendService.getPreferCor(userId);
@@ -104,6 +105,9 @@ public class UserPreferConsumer {
         for (String group : preferMap.keySet()) {
             corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group) * follow / (10.0 * totalFollow));
         }
+    }
+
+    private void updateHideGroup(String userId) {
         //更新对方hide_group
         HashMap<String, Double> groupMap = corgiUserRecommendService.getGroupCor(userId);
         Integer minCount = Integer.MAX_VALUE;
