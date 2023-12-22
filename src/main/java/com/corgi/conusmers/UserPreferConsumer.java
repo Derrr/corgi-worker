@@ -137,6 +137,7 @@ public class UserPreferConsumer {
 
                 if (thresholdWeight < weight && thresholdCount < minCount) {
                     Long weightCount = redisTemplate.opsForValue().increment("group_weight_" + hideGroup) - 1;
+                    log.info("weight count:" + weightCount);
                     if (weightCount <= thresholdCount) {
                         if (!"0".equals(hideGroup)) {
                             redisTemplate.opsForValue().decrement("group_weight_" + hideGroup);
