@@ -46,7 +46,7 @@ public class UserPreferConsumer {
     public void process(Channel channel, Message message, RecommendCalculater calculater) {
         String userId = calculater.getUserId();
         log.info("calculating... " + userId);
-        if (StringUtils.isEmpty(userId)) {
+        if (!StringUtils.isEmpty(userId)) {
             return;
         }
         Long totalFollow = corgiStatisticService.sumCount("follow", userId, "");
@@ -124,6 +124,7 @@ public class UserPreferConsumer {
                 Integer thresholdCount = Integer.MAX_VALUE - 1;
                 Object weightCache = redisTemplate.opsForHash().get("group_weight", key);
                 Object countCache = redisTemplate.opsForHash().get("group_count", key);
+                log.info(weightCache + " c " + countCache);
                 try {
                     if (weightCache != null && Double.valueOf(weightCache.toString()) > 0) {
                         thresholdWeight = Double.valueOf(weightCache.toString());
