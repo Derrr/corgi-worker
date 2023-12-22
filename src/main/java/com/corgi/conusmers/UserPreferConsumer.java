@@ -173,11 +173,11 @@ public class UserPreferConsumer {
                     if (residentGroups.contains(key)) {
                         continue;
                     }
-                    if (weightMap.get(key) > maxWeight) {
+                    Integer count = Integer.valueOf(redisTemplate.opsForHash().get("group_count", key) + "");
+                    if (weightMap.get(key) / count > maxWeight) {
                         Long result = redisTemplate.opsForValue().increment("group_weight_" + key);
-                        Integer count = Integer.valueOf(redisTemplate.opsForHash().get("group_count", key) + "");
                         if (result <= count) {
-                            maxWeight = weightMap.get(key);
+                            maxWeight = weightMap.get(key) / count;
                             hideGroup = key;
                         }
                     }
