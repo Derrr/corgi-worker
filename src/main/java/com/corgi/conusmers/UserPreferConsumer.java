@@ -122,7 +122,6 @@ public class UserPreferConsumer {
                 Integer thresholdCount = Integer.MAX_VALUE - 1;
                 Object weightCache = redisTemplate.opsForHash().get("group_weight", key);
                 Object countCache = redisTemplate.opsForHash().get("group_count", key);
-                log.info(weightCache + " c " + countCache);
                 try {
                     if (weightCache != null && Double.valueOf(weightCache.toString()) > 0) {
                         thresholdWeight = Double.valueOf(weightCache.toString());
