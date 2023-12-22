@@ -135,10 +135,15 @@ public class UserPreferConsumer {
                     log.info("group weight goes wrong", e);
                 }
                 Double weight = groupMap.get(key) / sum;
-                if (thresholdWeight < weight && thresholdCount < minCount) {
-                    minCount = thresholdCount;
-                    hideGroup = key;
-                    hideGroupCount = thresholdCount;
+                try {
+                    Integer weightCount = Integer.valueOf(redisTemplate.opsForValue().get("group_weight_" + hideGroup));
+                    if (weightCount <= thresholdCount && thresholdWeight < weight && thresholdCount < minCount) {
+                        minCount = thresholdCount;
+                        hideGroup = key;
+                        hideGroupCount = thresholdCount;
+                    }
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
                 }
                 if (weight > maxWeight) {
                     maxWeight = weight;
