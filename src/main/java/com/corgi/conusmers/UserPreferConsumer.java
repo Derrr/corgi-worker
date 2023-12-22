@@ -110,54 +110,84 @@ public class UserPreferConsumer {
     private void updateHideGroup(String userId) {
         //更新对方hide_group
         HashMap<String, Double> groupMap = corgiUserRecommendService.getGroupCor(userId);
-        Integer minCount = Integer.MAX_VALUE;
-        Double maxWeight = 0.0;
+        Integer maxCount = 0;
         String hideGroup = "0";
+        UserDetail update = new UserDetail();
+        update.setUserId(userId);
+        update.setUptime("1");
 
-        String maxHideGroup = "0";
         if (!CollectionUtils.isEmpty(groupMap)) {
             Double sum = groupMap.values().stream().reduce((m, n) -> m + n).get();
-            for (String key : groupMap.keySet()) {
-                Double thresholdWeight = 0.0;
-                Integer thresholdCount = Integer.MAX_VALUE - 1;
-                Object weightCache = redisTemplate.opsForHash().get("group_weight", key);
-                Object countCache = redisTemplate.opsForHash().get("group_count", key);
-                try {
-                    if (weightCache != null && Double.valueOf(weightCache.toString()) > 0) {
-                        thresholdWeight = Double.valueOf(weightCache.toString());
-                    }
-                    if (countCache != null && Integer.valueOf(countCache.toString()) > 0) {
-                        thresholdCount = Integer.valueOf(countCache.toString());
-                    }
-                } catch (Exception e) {
-                    log.info("group weight goes wrong", e);
-                }
-                Double weight = groupMap.get(key) / sum;
+            if (sum > 0.0) {
+                HashMap<String, Double> weightMap = new HashMap<>();
+                List<String> residentGroups = new ArrayList<>();
 
-                if (thresholdWeight < weight && thresholdCount < minCount) {
-                    Long weightCount = redisTemplate.opsForValue().increment("group_weight_" + hideGroup) - 1;
-                    if (weightCount <= thresholdCount) {
-                        if (!"0".equals(hideGroup)) {
-                            redisTemplate.opsForValue().decrement("group_weight_" + hideGroup);
+                for (String key : groupMap.keySet()) {
+                    Double thresholdWeight = 0.0;
+                    Integer thresholdCount = 0;
+                    Object weightCache = redisTemplate.opsForHash().get("group_weight", key);
+                    Object countCache = redisTemplate.opsForHash().get("group_count", key);
+                    try {
+                        if (weightCache != null && Double.valueOf(weightCache.toString()) > 0) {
+                            thresholdWeight = Double.valueOf(weightCache.toString());
                         }
-                        minCount = thresholdCount;
-                        hideGroup = key;
+                        if (countCache != null && Integer.valueOf(countCache.toString()) > 0) {
+                            thresholdCount = Integer.valueOf(countCache.toString());
+                        }
+                    } catch (Exception e) {
+                        log.info("group weight goes wrong", e);
+                    }
+                    Double weight = groupMap.get(key) / sum;
+                    weightMap.put(key, weight);
+                    if (thresholdWeight < weight) {
+                        residentGroups.add(key);
+                        if (thresholdCount > maxCount) {
+                            maxCount = thresholdCount;
+                            hideGroup = key;
+
+                        }
                     }
                 }
-                if (weight > maxWeight) {
-                    maxWeight = weight;
-                    maxHideGroup = key;
+                if (!"0".equals(hideGroup)) {
+                    Long result = redisTemplate.opsForValue().increment("group_weight_" + hideGroup);
+                    if (result <= maxCount) {
+                        update.setHideGroup(hideGroup);
+                        corgiUserService.updateDetail(update);
+                        return;
+                    }
+                } else if (residentGroups.size() > 1) {
+                    for (String group : residentGroups) {
+                        if (!hideGroup.equals(group)) {
+                            Long result = redisTemplate.opsForValue().increment("group_weight_" + group);
+                            Integer count = Integer.valueOf(redisTemplate.opsForHash().get("group_count", group) + "");
+                            if (result <= count) {
+                                update.setHideGroup(group);
+                                corgiUserService.updateDetail(update);
+                                return;
+                            }
+                        }
+                    }
                 }
-
+                Double maxWeight = 0.0;
+                for (String key : groupMap.keySet()) {
+                    if (residentGroups.contains(key)) {
+                        continue;
+                    }
+                    if (weightMap.get(key) > maxWeight) {
+                        Long result = redisTemplate.opsForValue().increment("group_weight_" + key);
+                        Integer count = Integer.valueOf(redisTemplate.opsForHash().get("group_count", key) + "");
+                        if (result <= count) {
+                            maxWeight = weightMap.get(key);
+                            hideGroup = key;
+                        }
+                    }
+                }
+                update.setHideGroup(hideGroup);
+                corgiUserService.updateDetail(update);
+                return;
             }
-            if ("0".equals(hideGroup)) {
-                hideGroup = maxHideGroup;
-            }
-            UserDetail update = new UserDetail();
-            update.setUserId(userId);
-            update.setUptime("1");
-            update.setHideGroup(hideGroup);
-            corgiUserService.updateDetail(update);
         }
+        update.setHideGroup("0");
+        corgiUserService.updateDetail(update);
     }
 }
