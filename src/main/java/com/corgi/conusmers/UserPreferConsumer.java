@@ -46,7 +46,7 @@ public class UserPreferConsumer {
     public void process(Channel channel, Message message, RecommendCalculater calculater) {
         String userId = calculater.getUserId();
         log.info("calculating... " + userId);
-        if (!StringUtils.isEmpty(userId)) {
+        if (StringUtils.isEmpty(userId)) {
             return;
         }
         Long totalFollow = corgiStatisticService.sumCount("follow", userId, "");
@@ -112,9 +112,7 @@ public class UserPreferConsumer {
         HashMap<String, Double> groupMap = corgiUserRecommendService.getGroupCor(userId);
         Integer minCount = Integer.MAX_VALUE;
         Double maxWeight = 0.0;
-
         String hideGroup = "0";
-        Integer hideGroupCount = 0;
 
         String maxHideGroup = "0";
         if (!CollectionUtils.isEmpty(groupMap)) {
@@ -136,15 +134,16 @@ public class UserPreferConsumer {
                     log.info("group weight goes wrong", e);
                 }
                 Double weight = groupMap.get(key) / sum;
-                try {
-                    Integer weightCount = Integer.valueOf(redisTemplate.opsForValue().get("group_weight_" + hideGroup));
-                    if (weightCount <= thresholdCount && thresholdWeight < weight && thresholdCount < minCount) {
+
+                if (thresholdWeight < weight && thresholdCount < minCount) {
+                    Long weightCount = redisTemplate.opsForValue().increment("group_weight_" + hideGroup) - 1;
+                    if (weightCount <= thresholdCount) {
+                        if (!"0".equals(hideGroup)) {
+                            redisTemplate.opsForValue().decrement("group_weight_" + hideGroup);
+                        }
                         minCount = thresholdCount;
                         hideGroup = key;
-                        hideGroupCount = thresholdCount;
                     }
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
                 }
                 if (weight > maxWeight) {
                     maxWeight = weight;
@@ -155,15 +154,10 @@ public class UserPreferConsumer {
             if ("0".equals(hideGroup)) {
                 hideGroup = maxHideGroup;
             }
-            Long result = redisTemplate.opsForValue().increment("group_weight_" + hideGroup);
             UserDetail update = new UserDetail();
             update.setUserId(userId);
             update.setUptime("1");
-            if (result <= hideGroupCount + 1) {
-                update.setHideGroup(hideGroup);
-            } else {
-                update.setHideGroup(maxHideGroup);
-            }
+            update.setHideGroup(hideGroup);
             corgiUserService.updateDetail(update);
         }
     }
