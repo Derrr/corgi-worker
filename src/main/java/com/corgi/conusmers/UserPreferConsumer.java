@@ -103,7 +103,7 @@ public class UserPreferConsumer {
         }
 
         for (String group : preferMap.keySet()) {
-            corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group) * follow / (10.0 * totalFollow));
+            corgiUserRecommendService.updatePreferCor(userId, group, preferMap.get(group) * 10000.0 * follow / (totalFollow * totalScore));
         }
     }
 
