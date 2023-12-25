@@ -168,20 +168,20 @@ public class UserPreferConsumer {
                         }
                     }
                 }
-                Double maxWeight = 0.0;
-                for (String key : groupMap.keySet()) {
-                    if (residentGroups.contains(key)) {
-                        continue;
-                    }
-                    Integer count = Integer.valueOf(redisTemplate.opsForHash().get("group_count", key) + "");
-                    if (weightMap.get(key) / count > maxWeight) {
-                        Long result = redisTemplate.opsForValue().increment("group_weight_" + key);
-                        if (result <= count) {
-                            maxWeight = weightMap.get(key) / count;
-                            hideGroup = key;
-                        }
-                    }
-                }
+//                Double maxWeight = 0.0;
+//                for (String key : groupMap.keySet()) {
+//                    if (residentGroups.contains(key)) {
+//                        continue;
+//                    }
+//                    Integer count = Integer.valueOf(redisTemplate.opsForHash().get("group_count", key) + "");
+//                    if (weightMap.get(key) / count > maxWeight) {
+//                        Long result = redisTemplate.opsForValue().increment("group_weight_" + key);
+//                        if (result <= count) {
+//                            maxWeight = weightMap.get(key) / count;
+//                            hideGroup = key;
+//                        }
+//                    }
+//                }
                 update.setHideGroup(hideGroup);
                 corgiUserService.updateDetail(update);
                 return;
