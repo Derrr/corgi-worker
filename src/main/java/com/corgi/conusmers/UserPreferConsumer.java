@@ -121,7 +121,6 @@ public class UserPreferConsumer {
         if (!CollectionUtils.isEmpty(groupMap)) {
             Double sum = groupMap.values().stream().reduce((m, n) -> m + n).get();
             if (sum > 0.0) {
-                HashMap<String, Double> weightMap = new HashMap<>();
                 List<String> residentGroups = new ArrayList<>();
 
                 for (String key : groupMap.keySet()) {
@@ -140,7 +139,6 @@ public class UserPreferConsumer {
                         log.info("group weight goes wrong", e);
                     }
                     Double weight = groupMap.get(key) / sum;
-                    weightMap.put(key, weight);
                     if (thresholdWeight < weight) {
                         residentGroups.add(key);
                         if (thresholdCount > maxCount) {
@@ -157,7 +155,8 @@ public class UserPreferConsumer {
                         corgiUserService.updateDetail(update);
                         return;
                     }
-                } else if (residentGroups.size() > 1) {
+                }
+                if (residentGroups.size() > 1) {
                     for (String group : groupOrder) {
                         if (!hideGroup.equals(group) && residentGroups.contains(group)) {
                             Long result = redisTemplate.opsForValue().increment("group_weight_" + group);
