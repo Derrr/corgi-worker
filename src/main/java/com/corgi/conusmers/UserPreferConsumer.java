@@ -53,7 +53,7 @@ public class UserPreferConsumer {
         if (totalFollow == 0) {
             return;
         }
-        //this.updateHideGroup(userId);
+        this.updateHideGroup(userId);
         Double totalScore = 0.0;
         Integer follow = 0;
         HashMap<String, Double> preferMap = corgiUserRecommendService.getPreferCor(userId);
