@@ -41,6 +41,8 @@ public class UserPreferConsumer {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    private static List<String> groupOrder = Arrays.asList("匀称", "肉壮", "肌肉", "偏胖", "精壮", "偏瘦");
+
 
     @RabbitHandler
     public void process(Channel channel, Message message, RecommendCalculater calculater) {
@@ -156,8 +158,8 @@ public class UserPreferConsumer {
                         return;
                     }
                 } else if (residentGroups.size() > 1) {
-                    for (String group : residentGroups) {
-                        if (!hideGroup.equals(group)) {
+                    for (String group : groupOrder) {
+                        if (!hideGroup.equals(group) && residentGroups.contains(group)) {
                             Long result = redisTemplate.opsForValue().increment("group_weight_" + group);
                             Integer count = Integer.valueOf(redisTemplate.opsForHash().get("group_count", group) + "");
                             if (result <= count) {
