@@ -144,7 +144,6 @@ public class UserPreferConsumer {
                         if (thresholdCount > maxCount) {
                             maxCount = thresholdCount;
                             hideGroup = key;
-
                         }
                     }
                 }
