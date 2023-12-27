@@ -41,7 +41,7 @@ public class UserPreferConsumer {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-    private static List<String> groupOrder = Arrays.asList("匀称", "肉壮", "肌肉", "偏胖", "精壮", "偏瘦");
+    private static List<String> groupOrder = Arrays.asList("偏瘦", "偏胖", "肌肉", "肉壮", "精壮", "匀称");
 
 
     @RabbitHandler
