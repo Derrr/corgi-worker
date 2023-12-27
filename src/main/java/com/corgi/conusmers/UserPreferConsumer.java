@@ -123,7 +123,7 @@ public class UserPreferConsumer {
             if (sum > 0.0) {
                 List<String> residentGroups = new ArrayList<>();
 
-                for (String key : groupMap.keySet()) {
+                for (String key : groupOrder) {
                     Double thresholdWeight = 0.0;
                     Integer thresholdCount = 0;
                     Object weightCache = redisTemplate.opsForHash().get("group_weight", key);
@@ -141,7 +141,7 @@ public class UserPreferConsumer {
                     Double weight = groupMap.get(key) / sum;
                     if (thresholdWeight < weight) {
                         residentGroups.add(key);
-                        if (thresholdCount > maxCount) {
+                        if ("0".equals(hideGroup)) {
                             maxCount = thresholdCount;
                             hideGroup = key;
                         }
