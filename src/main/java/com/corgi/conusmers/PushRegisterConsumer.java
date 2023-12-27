@@ -86,7 +86,7 @@ public class PushRegisterConsumer {
         extra.put("desc", "不管你是小白还是大佬，快来看看CORGI乐园全新游玩攻略手册");
         extra.put("picUrl", "http://corgi-pic.oss-cn-beijing.aliyuncs.com/shop/MTY1NjM5NjMzNTAwMA%3D%3D");
         extra.put("urlType", "1");
-        extra.put("url", "https://www.corgi.org.cn/html/wechat/newusers/html/guideline_v02.html");
+        extra.put("url", "https://www.corgi.org.cn/index/UserGuide/guideline_v02.html");
         pushMessage.setExtra(extra);
         pushService.sendMessage(pushMessage, Arrays.asList(userId));
 //        if (resultIds.size() > 0) {
