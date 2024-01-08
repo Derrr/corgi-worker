@@ -51,7 +51,7 @@ public class ActivityRecommendConsumer {
         }
         HashMap<String, Double> weightMap = new HashMap<>();
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, -30);
+        calendar.add(Calendar.DATE, -365);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String monthAgo = sdf.format(calendar.getTime());
         List<String> likeIds = corgiLikeService.getLikedActivity(userId, null, null, 1, 500);
