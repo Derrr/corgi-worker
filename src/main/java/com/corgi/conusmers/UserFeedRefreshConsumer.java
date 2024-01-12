@@ -62,15 +62,8 @@ public class UserFeedRefreshConsumer {
         List<String> blackUserIds = this.getBlackIds(userId);
         String ctime = sdf.format(new Date());
         String groups = null;
-        List<String> groupList = new ArrayList<>();
-        HashMap<String, Double> groupPrefer = corgiUserRecommendService.getPreferCor(userId);
-        if (!CollectionUtils.isEmpty(groupPrefer)) {
-            Double avg = groupPrefer.values().stream().reduce((m, n) -> m + n).get() / groupPrefer.size();
-            for (String group : groupPrefer.keySet()) {
-                if (groupPrefer.get(group) > avg) {
-                    groupList.add(group);
-                }
-            }
+        List<String> groupList = this.getPreferGroup(userId);
+        if (!CollectionUtils.isEmpty(groupList)) {
             groups = String.join("','", groupList);
         }
         String topic = "";
@@ -109,6 +102,21 @@ public class UserFeedRefreshConsumer {
         cacheManualFeed(userId);
         cacheUserFeed(userDetail, sdf);
         log.info("add result:{} ", result.size());
+    }
+
+    private List<String> getPreferGroup(String userId) {
+        List<String> groupList = new ArrayList<>();
+        HashMap<String, Double> groupPrefer = corgiUserRecommendService.getPreferCor(userId);
+        if (!CollectionUtils.isEmpty(groupPrefer)) {
+            Double max = groupPrefer.values().stream().max(Double::compareTo).get();
+            Double threshold = new Random().nextDouble() * max;
+            for (String group : groupPrefer.keySet()) {
+                if (groupPrefer.get(group) > threshold) {
+                    groupList.add(group);
+                }
+            }
+        }
+        return groupList;
     }
 
     private void cacheUserFeed(UserDetail detail, SimpleDateFormat sdf) {

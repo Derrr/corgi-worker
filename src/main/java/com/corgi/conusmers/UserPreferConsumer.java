@@ -168,6 +168,12 @@ public class UserPreferConsumer {
                         }
                     }
                 }
+                if ("0".equals(hideGroup)) {
+                    UserDetail detail = corgiUserService.getUserDetailBasic(userId);
+                    if (!StringUtils.isEmpty(detail.getGroup())) {
+                        hideGroup = detail.getGroup();
+                    }
+                }
                 update.setHideGroup(hideGroup);
                 corgiUserService.updateDetail(update);
                 return;
