@@ -84,7 +84,7 @@ public class PushService {
         String url = HOST + orgName + "/" + appName + MESSAGE_URL;
         HashMap message = new HashMap();
         message.put("title", "Corgi");
-        if (pushMessage.getSourceUserId() != null && pushMessage.getSourceUserId().contains(HELPER)) {
+        if (!StringUtils.isEmpty(pushMessage.getSourceUserId())) {
             message.put("from", pushMessage.getSourceUserId());
         }
         message.put("target_type", "users");
