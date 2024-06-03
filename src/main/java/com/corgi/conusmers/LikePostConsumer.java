@@ -59,6 +59,7 @@ public class LikePostConsumer {
         query.setPageSize(1);
 
         Integer likeCount = corgiLikeService.countRealActivityLike(activityLike.getActivityId());
+        log.info("like count:{} {}", activityLike.getActivityId(), likeCount);
         if (likeCount >= 30) {
             List<String> preActivityId = corgiUserActivityService.searchFeedActivity(query);
             this.addHot(preActivityId, likeCount * 0.8);
