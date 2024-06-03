@@ -108,6 +108,9 @@ public class LikePostConsumer {
                 break;
             }
             for (ActivityLike like : likes) {
+                if (!"real".equals(like.getType())) {
+                    continue;
+                }
                 List<String> activityIds = corgiLikeService.getLikedActivity(like.getLikeUserId(), "", "", 1, 1000);
                 log.info("like user:{} count:{} ", like.getLikeUserId(), activityIds.size());
                 for (String id : activityIds) {
