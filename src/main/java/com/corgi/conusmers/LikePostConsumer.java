@@ -5,10 +5,7 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.entity.ActivityQuery;
-import com.corgi.user.api.CorgiLikeService;
-import com.corgi.user.api.CorgiUserActivityService;
-import com.corgi.user.api.CorgiUserService;
-import com.corgi.user.api.CorgiVlogService;
+import com.corgi.user.api.*;
 import com.corgi.user.entity.ActivityLike;
 import com.corgi.user.entity.CorgiVlogHot;
 import com.corgi.user.entity.UserDetail;
@@ -19,9 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -35,6 +32,8 @@ public class LikePostConsumer {
     private CorgiLikeService corgiLikeService;
     @Reference
     private CorgiVlogService corgiVlogService;
+    @Reference
+    private CorgiFeedService corgiFeedService;
     @Reference
     private CorgiUserActivityService corgiUserActivityService;
     @Reference
@@ -63,6 +62,86 @@ public class LikePostConsumer {
             this.addHot(postActivityId, likeCount * 0.8);
         }
 
+        if (likeCount > 10) {
+            String key = activityLike.getActivityId() + "-recommend";
+            if (!redisTemplate.hasKey(key)) {
+                this.refreshRecommendList(activityLike.getActivityId(), likeCount, key);
+            }
+            List<String> recommendIds = redisTemplate.opsForList().range(key, 0, -1);
+            String loginUserId = activityLike.getLikeUserId();
+            String userKey = loginUserId + "-recommend-activity";
+            for (String recommendId : recommendIds) {
+                if (corgiFeedService.countFeed(recommendId, loginUserId) > 0) {
+                    continue;
+                }
+                redisTemplate.opsForList().leftPush(userKey, recommendId);
+            }
+        }
+    }
+
+    private void refreshRecommendList(String activityId, Integer likeCount, String key) {
+        int page = 1;
+        Map<String, Integer> map = new HashMap<>();
+        while (true) {
+            List<ActivityLike> likes = corgiLikeService.getActivityLike(activityId, page, 100);
+            if (CollectionUtils.isEmpty(likes)) {
+                break;
+            }
+            for (ActivityLike like : likes) {
+                List<String> activityIds = corgiLikeService.getLikedActivity(like.getLikeUserId(), "", "", 1, 1000);
+                for (String id : activityIds) {
+                    if (id.equals(activityId)) {
+                        continue;
+                    }
+                    Integer score = map.get(id);
+                    if (score == null) {
+                        score = 0;
+                    }
+                    score++;
+                    map.put(id, score);
+                }
+            }
+            page++;
+        }
+        List<Map.Entry> entryList = new ArrayList<>();
+        int minValue = 0;
+        int threshold = likeCount / 10 + 5;
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            if (entryList.size() < threshold) {
+                if (!checkActivity(entry.getKey())) {
+                    continue;
+                }
+                entryList.add(entry);
+                if (entry.getValue() > minValue) {
+                    minValue = entry.getValue();
+                }
+            } else if (entry.getValue() > minValue) {
+                if (!checkActivity(entry.getKey())) {
+                    continue;
+                }
+                for (int i = 0; i < entryList.size(); i++) {
+                    Map.Entry<String, Integer> oleEntry = entryList.get(i);
+                    if (oleEntry.getValue() <= minValue) {
+                        entryList.remove(i);
+                        break;
+                    }
+                }
+                entryList.add(entry);
+                minValue = entry.getValue();
+            }
+        }
+        for (Map.Entry<String, Integer> entry : entryList) {
+            redisTemplate.opsForList().leftPush(key, entry.getKey());
+        }
+        redisTemplate.expire(key, likeCount / 30 + 1, TimeUnit.DAYS);
+    }
+
+    private boolean checkActivity(String activityId) {
+        String status = corgiUserActivityService.getStatus("", activityId);
+        if (StringUtils.isEmpty(status)) {
+            return false;
+        }
+        return "normal".equals(status) || "pass".equals(status);
     }
 
     public void addHot(List<String> activityIds, Double likeCount) {
