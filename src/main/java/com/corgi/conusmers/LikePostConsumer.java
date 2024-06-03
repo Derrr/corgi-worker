@@ -125,7 +125,7 @@ public class LikePostConsumer {
         }
         List<Map.Entry> entryList = new ArrayList<>();
         int minValue = 0;
-        int threshold = likeCount / 10 + 5;
+        int threshold = likeCount / 10 + 10;
         for (Map.Entry<String, Integer> entry : map.entrySet()) {
             if (entryList.size() < threshold) {
                 if (!checkActivity(entry.getKey())) {
