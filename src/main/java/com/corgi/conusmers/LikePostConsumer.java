@@ -93,6 +93,7 @@ public class LikePostConsumer {
                     continue;
                 }
                 redisTemplate.opsForList().leftPush(userKey, activity.getId() + "-" + activity.getUserId());
+                log.info("add recommend:{} {}", activityLike.getActivityId(), activity.getId());
             }
             redisTemplate.expire(userKey, 90, TimeUnit.DAYS);
         }
