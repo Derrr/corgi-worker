@@ -8,6 +8,7 @@ import com.corgi.entity.ActivityQuery;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.ActivityLike;
 import com.corgi.user.entity.CorgiVlogHot;
+import com.corgi.user.entity.UserBasic;
 import com.corgi.user.entity.UserDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -38,6 +40,8 @@ public class LikePostConsumer {
     private CorgiActivityService corgiActivityService;
     @Reference
     private CorgiUserActivityService corgiUserActivityService;
+    @Reference
+    private CorgiBlacklistService corgiBlacklistService;
     @Reference
     private CorgiUserService corgiUserService;
     @Autowired
@@ -71,16 +75,23 @@ public class LikePostConsumer {
             }
             List<String> recommendIds = redisTemplate.opsForList().range(key, 0, -1);
             String loginUserId = activityLike.getLikeUserId();
+            List<String> blackIds = this.getBlackIds(loginUserId);
             String userKey = loginUserId + "-recommend-activity";
             List<CorgiActivity> activities = corgiActivityService.getActivityByIds(recommendIds);
             for (CorgiActivity activity : activities) {
                 if (corgiFeedService.countFeed(activity.getId(), loginUserId) > 0) {
                     continue;
                 }
+                if (StringUtils.isEmpty(activity.getUserId())) {
+                    continue;
+                }
                 if (loginUserId.equals(activity.getUserId())) {
                     continue;
                 }
-                redisTemplate.opsForList().leftPush(userKey, activity.getId());
+                if (blackIds.contains(activity.getUserId())) {
+                    continue;
+                }
+                redisTemplate.opsForList().leftPush(userKey, activity.getId() + "-" + activity.getUserId());
             }
             redisTemplate.expire(userKey, 90, TimeUnit.DAYS);
         }
@@ -149,6 +160,39 @@ public class LikePostConsumer {
             return false;
         }
         return "normal".equals(status) || "pass".equals(status);
+    }
+
+    private List<String> getBlackIds(String userId) {
+        String blackKey = "black_cache_" + userId;
+        List<String> blackUserIds = new ArrayList<>();
+        if (!redisTemplate.hasKey(blackKey)) {
+            List<UserBasic> basicList = corgiBlacklistService.getBlackUser(userId);
+            List<String> beBlackedIds = corgiBlacklistService.getBeBlacked(userId);
+            if (!CollectionUtils.isEmpty(basicList)) {
+                for (UserBasic basic : basicList) {
+                    blackUserIds.add(basic.getUserId());
+                }
+            }
+            if (!CollectionUtils.isEmpty(beBlackedIds)) {
+                blackUserIds.addAll(beBlackedIds);
+            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DATE, -30);
+            blackUserIds.addAll(corgiBlacklistService.getUninterestedCreator(userId, new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime())));
+            if (CollectionUtils.isEmpty(blackUserIds)) {
+                redisTemplate.delete(blackKey);
+                redisTemplate.opsForList().leftPush(blackKey, "null");
+            } else {
+                redisTemplate.opsForList().leftPushAll(blackKey, blackUserIds);
+            }
+            redisTemplate.expire(blackKey, 1L, TimeUnit.DAYS);
+        } else {
+            blackUserIds = redisTemplate.opsForList().range(blackKey, 0, -1);
+            if (blackUserIds.size() == 1 && "null".equals(blackUserIds.get(0))) {
+                return new ArrayList<>();
+            }
+        }
+        return blackUserIds;
     }
 
     public void addHot(List<String> activityIds, Double likeCount) {

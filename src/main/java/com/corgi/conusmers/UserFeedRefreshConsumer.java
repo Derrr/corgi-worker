@@ -54,12 +54,12 @@ public class UserFeedRefreshConsumer {
         if (userDetail == null) {
             return;
         }
+        List<String> blackUserIds = this.getBlackIds(userId);
         if (corgiFeedService.countUnviewFeed(userId) >= 10) {
             cacheUserFeed(userDetail, sdf);
-            cacheManualFeed(userId);
+            cacheManualFeed(userId, blackUserIds);
             return;
         }
-        List<String> blackUserIds = this.getBlackIds(userId);
         String ctime = sdf.format(new Date());
         String groups = null;
         List<String> groupList = this.getPreferGroup(userId);
@@ -99,7 +99,7 @@ public class UserFeedRefreshConsumer {
         for (CorgiVlog vlog : result) {
             corgiFeedService.addFeed(buildFeed(vlog, userId));
         }
-        cacheManualFeed(userId);
+        cacheManualFeed(userId, blackUserIds);
         cacheUserFeed(userDetail, sdf);
         log.info("add result:{} ", result.size());
     }
@@ -174,19 +174,26 @@ public class UserFeedRefreshConsumer {
     }
 
 
-    private void cacheManualFeed(String userId) {
+    private void cacheManualFeed(String userId, List<String> blackIds) {
+        String key = "manual_feed_" + userId;
+        if (redisTemplate.opsForList().size(key) > 10) {
+            return;
+        }
         CorgiVlog query = new CorgiVlog();
         query.setUserId(userId);
         query.setType(CorgiVlogHot.TYPE.MANUAL);
         query.setStatus("asc");
-        List<CorgiVlog> corgiVlogs = corgiVlogService.recallHotVlog(query, 5);
+        List<CorgiVlog> corgiVlogs = corgiVlogService.recallHotVlog(query, 10);
         if (!CollectionUtils.isEmpty(corgiVlogs)) {
             List<String> feeds = new ArrayList<>();
             for (CorgiVlog vlog : corgiVlogs) {
+                if (blackIds.contains(vlog.getUserId())) {
+                    continue;
+                }
                 feeds.add(vlog.getActivityId() + "-" + vlog.getUserId());
             }
-            redisTemplate.opsForList().rightPushAll("manual_feed_" + userId, feeds);
-            redisTemplate.expire("manual_feed_" + userId, 1L, TimeUnit.DAYS);
+            redisTemplate.opsForList().rightPushAll(key, feeds);
+            redisTemplate.expire(key, 1L, TimeUnit.DAYS);
         }
     }
 
