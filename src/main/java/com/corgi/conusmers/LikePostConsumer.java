@@ -59,7 +59,7 @@ public class LikePostConsumer {
         query.setPageSize(1);
 
         Integer likeCount = corgiLikeService.countRealActivityLike(activityLike.getActivityId());
-        log.info("like count:{} {}", activityLike.getActivityId(), likeCount);
+        log.info("like count:{} {} ", activityLike.getActivityId(), likeCount);
         if (likeCount >= 30) {
             List<String> preActivityId = corgiUserActivityService.searchFeedActivity(query);
             this.addHot(preActivityId, likeCount * 0.8);
@@ -109,6 +109,7 @@ public class LikePostConsumer {
             }
             for (ActivityLike like : likes) {
                 List<String> activityIds = corgiLikeService.getLikedActivity(like.getLikeUserId(), "", "", 1, 1000);
+                log.info("like user:{} count:{} ", like.getLikeUserId(), activityIds.size());
                 for (String id : activityIds) {
                     if (id.equals(activityId)) {
                         continue;
