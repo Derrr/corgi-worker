@@ -3,11 +3,11 @@ package com.corgi.conusmers;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.activity.api.CorgiActivityFeedService;
 import com.corgi.activity.api.CorgiActivityService;
-import com.corgi.activity.entity.ActivityPic;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.entity.ActivityQuery;
+import com.corgi.service.AliyunGreenService;
 import com.corgi.service.PushService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.CorgiUserGoods;
@@ -52,6 +52,8 @@ public class ActivityPostConsumer {
     private CorgiUserFollowService corgiUserFollowService;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private AliyunGreenService aliyunGreenService;
     @Autowired
     private PushService pushService;
 
@@ -143,13 +145,14 @@ public class ActivityPostConsumer {
                     }
                 }
             }
-        } else {
-            this.preHot(activity, lockKey);
         }
     }
 
     private void preHot(CorgiActivity activity, String lockKey) {
         if (!redisTemplate.opsForValue().setIfAbsent(lockKey, System.currentTimeMillis() + "", 10L, TimeUnit.MINUTES)) {
+            return;
+        }
+        if (!aliyunGreenService.checkFace(activity.getPics().get(0))) {
             return;
         }
         CorgiVlogHot corgiVlogHot = new CorgiVlogHot();
@@ -159,7 +162,6 @@ public class ActivityPostConsumer {
         corgiVlogHot.setExpectView(1000);
         corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
         corgiVlogService.addHotVlog(corgiVlogHot);
-        //corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
     }
 
     private void onHot(CorgiActivity activity, String lockKey) {
@@ -173,7 +175,6 @@ public class ActivityPostConsumer {
         corgiVlogHot.setExpectView(3000);
         corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
         corgiVlogService.addHotVlog(corgiVlogHot);
-        //corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
     }
 
     private PushMessage buildPayMessage(CorgiActivity activity, String desc) {
