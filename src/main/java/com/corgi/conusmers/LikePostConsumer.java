@@ -111,7 +111,7 @@ public class LikePostConsumer {
                 if (!"real".equals(like.getType())) {
                     continue;
                 }
-                List<String> activityIds = corgiLikeService.getLikedActivity(like.getLikeUserId(), "", "", 1, 1000);
+                List<String> activityIds = corgiLikeService.getLikedActivity(like.getLikeUserId(), "", "", 1, 100);
                 for (String id : activityIds) {
                     if (id.equals(activityId)) {
                         continue;
