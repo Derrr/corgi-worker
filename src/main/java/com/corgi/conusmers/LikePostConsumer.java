@@ -35,6 +35,8 @@ public class LikePostConsumer {
     @Reference
     private CorgiFeedService corgiFeedService;
     @Reference
+    private CorgiActivityService corgiActivityService;
+    @Reference
     private CorgiUserActivityService corgiUserActivityService;
     @Reference
     private CorgiUserService corgiUserService;
@@ -70,12 +72,17 @@ public class LikePostConsumer {
             List<String> recommendIds = redisTemplate.opsForList().range(key, 0, -1);
             String loginUserId = activityLike.getLikeUserId();
             String userKey = loginUserId + "-recommend-activity";
-            for (String recommendId : recommendIds) {
-                if (corgiFeedService.countFeed(recommendId, loginUserId) > 0) {
+            List<CorgiActivity> activities = corgiActivityService.getActivityByIds(recommendIds);
+            for (CorgiActivity activity : activities) {
+                if (corgiFeedService.countFeed(activity.getId(), loginUserId) > 0) {
                     continue;
                 }
-                redisTemplate.opsForList().leftPush(userKey, recommendId);
+                if (loginUserId.equals(activity.getUserId())) {
+                    continue;
+                }
+                redisTemplate.opsForList().leftPush(userKey, activity.getId());
             }
+            redisTemplate.expire(userKey, 90, TimeUnit.DAYS);
         }
     }
 
