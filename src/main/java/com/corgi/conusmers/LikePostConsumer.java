@@ -132,22 +132,32 @@ public class LikePostConsumer {
                     continue;
                 }
                 entryList.add(entry);
-                if (entry.getValue() > minValue) {
+                if (entry.getValue() < minValue) {
                     minValue = entry.getValue();
                 }
             } else if (entry.getValue() > minValue) {
                 if (!checkActivity(entry.getKey())) {
                     continue;
                 }
+                int tmpMinValue = entry.getValue();
+                int minIndex = 0;
                 for (int i = 0; i < entryList.size(); i++) {
-                    Map.Entry<String, Integer> oleEntry = entryList.get(i);
-                    if (oleEntry.getValue() <= minValue) {
-                        entryList.remove(i);
-                        break;
+                    Map.Entry<String, Integer> oldEntry = entryList.get(i);
+                    if (oldEntry.getValue() < minValue) {
+                        minIndex = i;
+                        tmpMinValue = minValue;
+                        minValue = oldEntry.getValue();
+                    }
+                    if (oldEntry.getValue() == minValue) {
+                        minIndex = i;
+                    }
+                    if (oldEntry.getValue() > minValue && oldEntry.getValue() < tmpMinValue) {
+                        tmpMinValue = oldEntry.getValue();
                     }
                 }
+                entryList.remove(minIndex);
                 entryList.add(entry);
-                minValue = entry.getValue();
+                minValue = tmpMinValue;
             }
         }
         for (Map.Entry<String, Integer> entry : entryList) {
