@@ -80,19 +80,15 @@ public class LikePostConsumer {
             String userKey = loginUserId + "-recommend-activity";
             List<CorgiActivity> activities = corgiActivityService.getActivityByIds(recommendIds);
             for (CorgiActivity activity : activities) {
-                log.info("trying countFeed");
                 if (corgiFeedService.countFeed(activity.getId(), loginUserId) > 0) {
                     continue;
                 }
-                log.info("trying empty");
                 if (StringUtils.isEmpty(activity.getUserId())) {
                     continue;
                 }
-                log.info("trying woner");
                 if (loginUserId.equals(activity.getUserId())) {
                     continue;
                 }
-                log.info("trying block");
                 if (blackIds.contains(activity.getUserId())) {
                     continue;
                 }
@@ -116,7 +112,6 @@ public class LikePostConsumer {
                     continue;
                 }
                 List<String> activityIds = corgiLikeService.getLikedActivity(like.getLikeUserId(), "", "", 1, 1000);
-                log.info("like user:{} count:{} ", like.getLikeUserId(), activityIds.size());
                 for (String id : activityIds) {
                     if (id.equals(activityId)) {
                         continue;
