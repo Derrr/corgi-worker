@@ -152,7 +152,7 @@ public class LikePostConsumer {
         }
         for (Map.Entry<String, Integer> entry : entryList) {
             redisTemplate.opsForList().leftPush(key, entry.getKey());
-            log.info("activity recommend:{} {}", activityLike.getActivityId(), activity.getId());
+            log.info("activity recommend:{}", entry.getKey());
         }
         redisTemplate.expire(key, likeCount / 30 + 1, TimeUnit.DAYS);
     }
