@@ -6,10 +6,7 @@ import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.entity.ActivityQuery;
 import com.corgi.user.api.*;
-import com.corgi.user.entity.ActivityLike;
-import com.corgi.user.entity.CorgiVlogHot;
-import com.corgi.user.entity.UserBasic;
-import com.corgi.user.entity.UserDetail;
+import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -44,6 +41,8 @@ public class LikePostConsumer {
     private CorgiBlacklistService corgiBlacklistService;
     @Reference
     private CorgiUserService corgiUserService;
+    @Reference
+    private CorgiUserWechatService corgiUserWechatService;
     @Autowired
     private StringRedisTemplate redisTemplate;
 
@@ -96,6 +95,16 @@ public class LikePostConsumer {
                 log.info("add recommend:{} {}", activityLike.getActivityId(), activity.getId());
             }
             redisTemplate.expire(userKey, 90, TimeUnit.DAYS);
+        }
+        String targetUserId = activityLike.getUserId();
+        String userId = activityLike.getLikeUserId();
+        UserWechat wechat = corgiUserWechatService.getUserWechat(targetUserId);
+        //用户没有开放微信购买
+        if (wechat != null && !"0".equals(wechat.getStatus()) &&
+                redisTemplate.opsForValue().setIfAbsent("get_user_wechat_".concat(userId).concat("-").concat(targetUserId), "1", 7, TimeUnit.DAYS)) {
+            String key = "feed_user_wechat_".concat(userId);
+            redisTemplate.opsForList().leftPush(key, targetUserId);
+            redisTemplate.expire(key, 30l, TimeUnit.DAYS);
         }
     }
 
